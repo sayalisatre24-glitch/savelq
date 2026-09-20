@@ -1,26 +1,27 @@
 /**
- * SaveIQ - Chart.js Visualization Layer
- * Handles all dynamic, interactive financial charts with modern fintech color schemes.
+ * SaveIQ - Chart.js Visualization Layer (Light Theme Palette)
+ * Handles all dynamic, interactive financial charts with light-mode fintech color schemes.
  */
 
 const SaveIQCharts = {
   instances: {},
 
-  // Theme color palette
+  // Theme color palette for Light Mode
   colors: {
-    primary: '#6366f1',    // Indigo
-    primaryLight: 'rgba(99, 102, 241, 0.2)',
-    success: '#10b981',    // Emerald
-    successLight: 'rgba(16, 185, 129, 0.2)',
-    warning: '#f59e0b',    // Amber
-    warningLight: 'rgba(245, 158, 11, 0.2)',
-    danger: '#ef4444',     // Rose
-    dangerLight: 'rgba(239, 68, 68, 0.2)',
-    cyan: '#06b6d4',
-    purple: '#8b5cf6',
+    primary: '#4f46e5',    // Indigo
+    primaryLight: 'rgba(79, 70, 229, 0.15)',
+    success: '#059669',    // Emerald
+    successLight: 'rgba(5, 150, 105, 0.15)',
+    warning: '#d97706',    // Amber
+    warningLight: 'rgba(217, 119, 6, 0.15)',
+    danger: '#e11d48',     // Rose
+    dangerLight: 'rgba(225, 29, 72, 0.15)',
+    cyan: '#0891b2',
+    purple: '#7c3aed',
     gray: '#64748b',
-    borderDark: '#334155',
-    textMuted: '#94a3b8'
+    border: '#e2e8f0',
+    textMain: '#1e293b',
+    textMuted: '#64748b'
   },
 
   /**
@@ -46,7 +47,7 @@ const SaveIQCharts = {
     
     // Palette generator for multiple goals
     const palette = [
-      '#6366f1', '#10b981', '#f59e0b', '#06b6d4', '#8b5cf6', '#ec4899', '#3b82f6'
+      '#4f46e5', '#059669', '#0891b2', '#d97706', '#7c3aed', '#db2777', '#2563eb'
     ];
 
     this.instances['goalsDist'] = new Chart(ctx, {
@@ -57,7 +58,7 @@ const SaveIQCharts = {
           data: dataValues.length ? dataValues : [1],
           backgroundColor: palette.slice(0, Math.max(1, labels.length)),
           borderWidth: 2,
-          borderColor: '#1e293b',
+          borderColor: '#ffffff',
           hoverOffset: 6
         }]
       },
@@ -69,17 +70,17 @@ const SaveIQCharts = {
           legend: {
             position: 'bottom',
             labels: {
-              color: '#cbd5e1',
+              color: '#334155',
               boxWidth: 12,
               padding: 14,
-              font: { family: 'Outfit, sans-serif', size: 12 }
+              font: { family: 'Outfit, sans-serif', size: 12, weight: '500' }
             }
           },
           tooltip: {
-            backgroundColor: '#0f172a',
-            titleColor: '#f8fafc',
-            bodyColor: '#cbd5e1',
-            borderColor: '#334155',
+            backgroundColor: '#1e293b',
+            titleColor: '#ffffff',
+            bodyColor: '#e2e8f0',
+            borderColor: '#cbd5e1',
             borderWidth: 1,
             callbacks: {
               label: (context) => {
@@ -107,14 +108,14 @@ const SaveIQCharts = {
     const categoryColors = {
       Food: '#f59e0b',
       Transport: '#3b82f6',
-      Bills: '#ef4444',
-      Shopping: '#ec4899',
-      Entertainment: '#8b5cf6',
-      Education: '#10b981',
+      Bills: '#e11d48',
+      Shopping: '#db2777',
+      Entertainment: '#7c3aed',
+      Education: '#059669',
       Other: '#64748b'
     };
 
-    const bgColors = labels.map(l => categoryColors[l] || '#6366f1');
+    const bgColors = labels.map(l => categoryColors[l] || '#4f46e5');
 
     this.instances['expensePie'] = new Chart(ctx, {
       type: 'doughnut',
@@ -124,7 +125,7 @@ const SaveIQCharts = {
           data: dataValues,
           backgroundColor: bgColors,
           borderWidth: 2,
-          borderColor: '#1e293b',
+          borderColor: '#ffffff',
           hoverOffset: 6
         }]
       },
@@ -135,17 +136,17 @@ const SaveIQCharts = {
           legend: {
             position: 'right',
             labels: {
-              color: '#cbd5e1',
+              color: '#334155',
               boxWidth: 12,
               padding: 12,
-              font: { family: 'Outfit, sans-serif', size: 11 }
+              font: { family: 'Outfit, sans-serif', size: 11, weight: '500' }
             }
           },
           tooltip: {
-            backgroundColor: '#0f172a',
-            titleColor: '#f8fafc',
-            bodyColor: '#cbd5e1',
-            borderColor: '#334155',
+            backgroundColor: '#1e293b',
+            titleColor: '#ffffff',
+            bodyColor: '#e2e8f0',
+            borderColor: '#cbd5e1',
             borderWidth: 1,
             callbacks: {
               label: (context) => {
@@ -179,7 +180,7 @@ const SaveIQCharts = {
               budget50_30_20.actualWants,
               budget50_30_20.actualSavings
             ],
-            backgroundColor: '#6366f1',
+            backgroundColor: '#4f46e5',
             borderRadius: 6
           },
           {
@@ -189,7 +190,7 @@ const SaveIQCharts = {
               budget50_30_20.idealWants,
               budget50_30_20.idealSavings
             ],
-            backgroundColor: 'rgba(148, 163, 184, 0.3)',
+            backgroundColor: 'rgba(148, 163, 184, 0.4)',
             borderRadius: 6
           }
         ]
@@ -199,24 +200,24 @@ const SaveIQCharts = {
         maintainAspectRatio: false,
         scales: {
           x: {
-            ticks: { color: '#94a3b8', font: { family: 'Outfit, sans-serif', size: 11 } },
-            grid: { color: 'rgba(255,255,255,0.05)' }
+            ticks: { color: '#475569', font: { family: 'Outfit, sans-serif', size: 11, weight: '600' } },
+            grid: { color: 'rgba(0,0,0,0.04)' }
           },
           y: {
             ticks: { 
-              color: '#94a3b8',
+              color: '#475569',
               callback: (val) => '₹' + (val >= 1000 ? (val/1000) + 'k' : val)
             },
-            grid: { color: 'rgba(255,255,255,0.05)' }
+            grid: { color: 'rgba(0,0,0,0.04)' }
           }
         },
         plugins: {
           legend: {
-            labels: { color: '#cbd5e1', font: { family: 'Outfit, sans-serif', size: 12 } }
+            labels: { color: '#1e293b', font: { family: 'Outfit, sans-serif', size: 12, weight: '600' } }
           },
           tooltip: {
-            backgroundColor: '#0f172a',
-            borderColor: '#334155',
+            backgroundColor: '#1e293b',
+            borderColor: '#cbd5e1',
             borderWidth: 1,
             callbacks: {
               label: (context) => ` ${context.dataset.label}: ₹${Number(context.parsed.y).toLocaleString()}`
@@ -250,7 +251,6 @@ const SaveIQCharts = {
       dataPoints.push(runningTotal);
     });
 
-    // If current savings > running total or no history, ensure present is plotted
     if (dataPoints[dataPoints.length - 1] < goal.CurrentSavings) {
       labels.push('Today');
       dataPoints.push(goal.CurrentSavings);
@@ -264,18 +264,18 @@ const SaveIQCharts = {
           {
             label: 'Accumulated Savings (₹)',
             data: dataPoints,
-            borderColor: '#10b981',
-            backgroundColor: 'rgba(16, 185, 129, 0.15)',
+            borderColor: '#059669',
+            backgroundColor: 'rgba(5, 150, 105, 0.1)',
             fill: true,
             tension: 0.3,
             borderWidth: 3,
             pointRadius: 4,
-            pointBackgroundColor: '#10b981'
+            pointBackgroundColor: '#059669'
           },
           {
             label: 'Target Goal (₹)',
             data: Array(labels.length).fill(goal.TargetAmount),
-            borderColor: '#ef4444',
+            borderColor: '#e11d48',
             borderDash: [6, 6],
             borderWidth: 2,
             fill: false,
@@ -288,24 +288,24 @@ const SaveIQCharts = {
         maintainAspectRatio: false,
         scales: {
           x: {
-            ticks: { color: '#94a3b8', font: { size: 10 } },
-            grid: { color: 'rgba(255,255,255,0.05)' }
+            ticks: { color: '#64748b', font: { size: 10 } },
+            grid: { color: 'rgba(0,0,0,0.04)' }
           },
           y: {
             ticks: { 
-              color: '#94a3b8',
+              color: '#64748b',
               callback: (val) => '₹' + (val >= 1000 ? (val/1000) + 'k' : val)
             },
-            grid: { color: 'rgba(255,255,255,0.05)' }
+            grid: { color: 'rgba(0,0,0,0.04)' }
           }
         },
         plugins: {
           legend: {
-            labels: { color: '#cbd5e1', font: { family: 'Outfit, sans-serif', size: 11 } }
+            labels: { color: '#334155', font: { family: 'Outfit, sans-serif', size: 11, weight: '600' } }
           },
           tooltip: {
-            backgroundColor: '#0f172a',
-            borderColor: '#334155',
+            backgroundColor: '#1e293b',
+            borderColor: '#cbd5e1',
             borderWidth: 1,
             callbacks: {
               label: (ctx) => ` ${ctx.dataset.label}: ₹${Number(ctx.parsed.y).toLocaleString()}`
@@ -337,7 +337,7 @@ const SaveIQCharts = {
               baseEval.requiredMonthlySaving,
               baseEval.monthlyCapacity
             ],
-            backgroundColor: 'rgba(99, 102, 241, 0.7)',
+            backgroundColor: 'rgba(79, 70, 229, 0.75)',
             borderRadius: 6
           },
           {
@@ -348,7 +348,7 @@ const SaveIQCharts = {
               simEval.requiredMonthlySaving,
               simEval.monthlyCapacity
             ],
-            backgroundColor: 'rgba(16, 185, 129, 0.8)',
+            backgroundColor: 'rgba(5, 150, 105, 0.85)',
             borderRadius: 6
           }
         ]
@@ -358,24 +358,24 @@ const SaveIQCharts = {
         maintainAspectRatio: false,
         scales: {
           x: {
-            ticks: { color: '#cbd5e1', font: { family: 'Outfit, sans-serif', size: 11 } },
-            grid: { color: 'rgba(255,255,255,0.05)' }
+            ticks: { color: '#334155', font: { family: 'Outfit, sans-serif', size: 11, weight: '600' } },
+            grid: { color: 'rgba(0,0,0,0.04)' }
           },
           y: {
             ticks: { 
-              color: '#94a3b8',
+              color: '#64748b',
               callback: (val) => '₹' + (val >= 1000 ? (val/1000) + 'k' : val)
             },
-            grid: { color: 'rgba(255,255,255,0.05)' }
+            grid: { color: 'rgba(0,0,0,0.04)' }
           }
         },
         plugins: {
           legend: {
-            labels: { color: '#f8fafc', font: { family: 'Outfit, sans-serif', size: 12 } }
+            labels: { color: '#0f172a', font: { family: 'Outfit, sans-serif', size: 12, weight: '600' } }
           },
           tooltip: {
-            backgroundColor: '#0f172a',
-            borderColor: '#334155',
+            backgroundColor: '#1e293b',
+            borderColor: '#cbd5e1',
             borderWidth: 1,
             callbacks: {
               label: (ctx) => ` ${ctx.dataset.label}: ₹${Number(ctx.parsed.y).toLocaleString()}`

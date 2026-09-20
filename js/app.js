@@ -1137,12 +1137,12 @@ const SaveIQApp = {
     bubble.style.justifyContent = isUser ? 'flex-end' : 'flex-start';
 
     bubble.innerHTML = isUser ? `
-      <div style="background: var(--gradient-brand); color: #fff; padding: 0.75rem 1.1rem; border-radius: var(--radius-md); font-size: 0.88rem; max-width: 80%;">
+      <div style="background: var(--gradient-brand); color: #ffffff; padding: 0.75rem 1.1rem; border-radius: var(--radius-md); font-size: 0.88rem; max-width: 80%; box-shadow: var(--shadow-sm);">
         ${this.escapeHTML(text)}
       </div>
     ` : `
       <div class="ai-sparkle" style="width: 28px; height: 28px; font-size: 0.8rem; flex-shrink: 0;"><i class="fa-solid fa-robot"></i></div>
-      <div style="background: rgba(30, 41, 59, 0.85); padding: 0.85rem 1.1rem; border-radius: var(--radius-md); font-size: 0.88rem; color: #f1f5f9; line-height: 1.5; border: 1px solid var(--border-subtle); max-width: 85%;">
+      <div style="background: #ffffff; padding: 0.85rem 1.1rem; border-radius: var(--radius-md); font-size: 0.88rem; color: #1e293b; line-height: 1.5; border: 1px solid var(--border-subtle); box-shadow: var(--shadow-sm); max-width: 85%;">
         ${this.formatMarkdown(text)}
       </div>
     `;
@@ -1160,7 +1160,7 @@ const SaveIQApp = {
     bubble.style.gap = '0.75rem';
     bubble.innerHTML = `
       <div class="ai-sparkle" style="width: 28px; height: 28px; font-size: 0.8rem; flex-shrink: 0;"><i class="fa-solid fa-robot"></i></div>
-      <div style="background: rgba(30, 41, 59, 0.6); padding: 0.75rem 1rem; border-radius: var(--radius-md); font-size: 0.85rem; color: var(--text-secondary);">
+      <div style="background: #ffffff; padding: 0.75rem 1rem; border-radius: var(--radius-md); font-size: 0.85rem; color: var(--text-secondary); border: 1px solid var(--border-subtle); box-shadow: var(--shadow-sm);">
         <i class="fa-solid fa-spinner fa-spin"></i> Groq AI is analyzing...
       </div>
     `;

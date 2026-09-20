@@ -8,6 +8,7 @@ const SaveIQAPI = {
   // Config keys
   CONFIG_GAS_URL_KEY: 'saveiq_gas_endpoint_url',
   CONFIG_GROQ_KEY: 'saveiq_client_groq_key',
+  CONFIG_VERSION_KEY: 'saveiq_storage_version',
   STORAGE_USERS_KEY: 'saveiq_users_db',
   STORAGE_GOALS_KEY: 'saveiq_goals_db',
   STORAGE_SAVINGS_KEY: 'saveiq_savings_db',
@@ -37,9 +38,19 @@ const SaveIQAPI = {
   },
 
   /**
-   * Initialize LocalStorage with rich sample data if empty
+   * Initialize LocalStorage with exactly 2 example goals
    */
-  initStorage() {
+  initStorage(forceReset = false) {
+    const currentVer = localStorage.getItem(this.CONFIG_VERSION_KEY);
+    const targetVer = 'v2_two_goals';
+
+    if (forceReset || currentVer !== targetVer) {
+      localStorage.removeItem(this.STORAGE_GOALS_KEY);
+      localStorage.removeItem(this.STORAGE_SAVINGS_KEY);
+      localStorage.removeItem(this.STORAGE_ALERTS_KEY);
+      localStorage.setItem(this.CONFIG_VERSION_KEY, targetVer);
+    }
+
     if (!localStorage.getItem(this.STORAGE_USERS_KEY)) {
       const defaultUser = {
         UserID: 'USR_001',
@@ -52,17 +63,18 @@ const SaveIQAPI = {
       localStorage.setItem(this.STORAGE_USERS_KEY, JSON.stringify([defaultUser]));
     }
 
+    // Exactly 2 Example Goals
     if (!localStorage.getItem(this.STORAGE_GOALS_KEY)) {
       const defaultGoals = [
         {
           GoalID: 'GOAL_001',
           UserID: 'USR_001',
-          GoalName: 'MacBook Pro M3 for Tech Project',
+          GoalName: 'Laptop Purchase (MacBook Pro)',
           Purpose: 'Laptop Purchase',
-          TargetAmount: 140000,
-          CurrentSavings: 65000,
-          MonthlySavingCapacity: 15000,
-          Deadline: '2026-11-30',
+          TargetAmount: 60000,
+          CurrentSavings: 20000,
+          MonthlySavingCapacity: 6000,
+          Deadline: '2027-05-30',
           Status: 'On Track',
           RealityScore: 88,
           EmailAlert: true,
@@ -71,44 +83,16 @@ const SaveIQAPI = {
         {
           GoalID: 'GOAL_002',
           UserID: 'USR_001',
-          GoalName: '6-Month Emergency Safety Fund',
+          GoalName: 'Emergency Safety Fund',
           Purpose: 'Emergency Fund',
-          TargetAmount: 250000,
-          CurrentSavings: 80000,
+          TargetAmount: 200000,
+          CurrentSavings: 60000,
           MonthlySavingCapacity: 12000,
-          Deadline: '2027-04-30',
+          Deadline: '2027-10-31',
           Status: 'On Track',
           RealityScore: 84,
           EmailAlert: true,
           CreatedDate: '2026-01-20'
-        },
-        {
-          GoalID: 'GOAL_003',
-          UserID: 'USR_001',
-          GoalName: 'European Solo Backpacking Trip',
-          Purpose: 'Vacation',
-          TargetAmount: 180000,
-          CurrentSavings: 30000,
-          MonthlySavingCapacity: 10000,
-          Deadline: '2026-12-15',
-          Status: 'Needs Adjustment',
-          RealityScore: 62,
-          EmailAlert: true,
-          CreatedDate: '2026-03-01'
-        },
-        {
-          GoalID: 'GOAL_004',
-          UserID: 'USR_001',
-          GoalName: 'Advanced AI & ML Certification',
-          Purpose: 'Education',
-          TargetAmount: 45000,
-          CurrentSavings: 45000,
-          MonthlySavingCapacity: 8000,
-          Deadline: '2026-08-15',
-          Status: 'Completed',
-          RealityScore: 100,
-          EmailAlert: false,
-          CreatedDate: '2026-01-10'
         }
       ];
       localStorage.setItem(this.STORAGE_GOALS_KEY, JSON.stringify(defaultGoals));
@@ -116,15 +100,10 @@ const SaveIQAPI = {
 
     if (!localStorage.getItem(this.STORAGE_SAVINGS_KEY)) {
       const defaultSavings = [
-        { SavingID: 'SAV_001', GoalID: 'GOAL_001', Date: '2026-02-05', Amount: 15000, Notes: 'February monthly savings deposit' },
-        { SavingID: 'SAV_002', GoalID: 'GOAL_001', Date: '2026-03-05', Amount: 15000, Notes: 'March monthly savings deposit' },
-        { SavingID: 'SAV_003', GoalID: 'GOAL_001', Date: '2026-04-10', Amount: 20000, Notes: 'Freelance bonus contribution' },
-        { SavingID: 'SAV_004', GoalID: 'GOAL_001', Date: '2026-05-02', Amount: 15000, Notes: 'May monthly deposit' },
-        { SavingID: 'SAV_005', GoalID: 'GOAL_002', Date: '2026-02-15', Amount: 30000, Notes: 'Initial emergency buffer' },
-        { SavingID: 'SAV_006', GoalID: 'GOAL_002', Date: '2026-03-15', Amount: 25000, Notes: 'Monthly transfer' },
-        { SavingID: 'SAV_007', GoalID: 'GOAL_002', Date: '2026-04-15', Amount: 25000, Notes: 'Monthly transfer' },
-        { SavingID: 'SAV_008', GoalID: 'GOAL_003', Date: '2026-03-20', Amount: 30000, Notes: 'Initial trip fund allotment' },
-        { SavingID: 'SAV_009', GoalID: 'GOAL_004', Date: '2026-01-20', Amount: 45000, Notes: 'Course fee paid in full' }
+        { SavingID: 'SAV_001', GoalID: 'GOAL_001', Date: '2026-02-05', Amount: 10000, Notes: 'Initial deposit for Laptop' },
+        { SavingID: 'SAV_002', GoalID: 'GOAL_001', Date: '2026-03-05', Amount: 10000, Notes: 'Monthly savings contribution' },
+        { SavingID: 'SAV_003', GoalID: 'GOAL_002', Date: '2026-02-15', Amount: 30000, Notes: 'Initial emergency buffer deposit' },
+        { SavingID: 'SAV_004', GoalID: 'GOAL_002', Date: '2026-03-15', Amount: 30000, Notes: 'Monthly emergency fund deposit' }
       ];
       localStorage.setItem(this.STORAGE_SAVINGS_KEY, JSON.stringify(defaultSavings));
     }
@@ -136,16 +115,14 @@ const SaveIQAPI = {
         { ExpenseID: 'EXP_003', UserID: 'USR_001', Date: '2026-09-07', Category: 'Transport', Amount: 4500, Notes: 'Metro pass & fuel' },
         { ExpenseID: 'EXP_004', UserID: 'USR_001', Date: '2026-09-10', Category: 'Bills', Amount: 3200, Notes: 'High-speed Fiber & Electricity' },
         { ExpenseID: 'EXP_005', UserID: 'USR_001', Date: '2026-09-12', Category: 'Entertainment', Amount: 2800, Notes: 'Movie tickets and subscriptions' },
-        { ExpenseID: 'EXP_006', UserID: 'USR_001', Date: '2026-09-15', Category: 'Shopping', Amount: 4000, Notes: 'Clothing and essentials' },
-        { ExpenseID: 'EXP_007', UserID: 'USR_001', Date: '2026-09-18', Category: 'Education', Amount: 1500, Notes: 'Books & research papers' }
+        { ExpenseID: 'EXP_006', UserID: 'USR_001', Date: '2026-09-15', Category: 'Shopping', Amount: 4000, Notes: 'Clothing and essentials' }
       ];
       localStorage.setItem(this.STORAGE_EXPENSES_KEY, JSON.stringify(defaultExpenses));
     }
 
     if (!localStorage.getItem(this.STORAGE_ALERTS_KEY)) {
       const defaultAlerts = [
-        { AlertID: 'ALT_001', GoalID: 'GOAL_003', UserID: 'USR_001', AlertType: 'Deadline Approaching', SentDate: '2026-09-15', Status: 'Sent', Message: 'European Solo Trip deadline has 3 months remaining. Monthly required savings is ₹16,666.' },
-        { AlertID: 'ALT_002', GoalID: 'GOAL_004', UserID: 'USR_001', AlertType: 'Goal Completed', SentDate: '2026-08-15', Status: 'Sent', Message: 'Congratulations! You reached 100% of your AI & ML Certification goal.' }
+        { AlertID: 'ALT_001', GoalID: 'GOAL_001', UserID: 'USR_001', AlertType: 'Deadline Approaching', SentDate: '2026-09-15', Status: 'Sent', Message: 'Laptop Purchase has 8 months remaining. Required monthly saving is ₹5,000.' }
       ];
       localStorage.setItem(this.STORAGE_ALERTS_KEY, JSON.stringify(defaultAlerts));
     }

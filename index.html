@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SaveIQ – AI Goal Reality & Smart Savings Planner</title>
+  <meta name="description" content="AI-powered personal finance intelligence system with Goal Reality Check, 0-100 Reality Score, What-If Simulation, and automated Google Apps Script integration.">
+  
+  <!-- Google Fonts: Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  
+  <!-- App Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- ==========================================================================
+         SIDEBAR NAVIGATION
+         ========================================================================== -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-logo">
+          <i class="fa-solid fa-chart-line"></i>
+        </div>
+        <div class="brand-text">
+          <h1>SaveIQ</h1>
+          <span>AI Goal Intelligence</span>
+        </div>
+      </div>
+
+      <ul class="nav-links">
+        <li class="nav-link active" data-view="dashboard">
+          <i class="fa-solid fa-house"></i>
+          <span>Dashboard</span>
+        </li>
+        <li class="nav-link" data-view="create-goal">
+          <i class="fa-solid fa-circle-plus"></i>
+          <span>Create Goal</span>
+        </li>
+        <li class="nav-link" data-view="my-goals">
+          <i class="fa-solid fa-bullseye"></i>
+          <span>My Goals</span>
+        </li>
+        <li class="nav-link" data-view="what-if">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <span>What-If Simulator</span>
+        </li>
+        <li class="nav-link" data-view="expenses">
+          <i class="fa-solid fa-wallet"></i>
+          <span>Expense & Budget</span>
+        </li>
+        <li class="nav-link" data-view="ai-advisor">
+          <i class="fa-solid fa-robot"></i>
+          <span>AI Financial Advisor</span>
+        </li>
+        <li class="nav-link" data-view="profile">
+          <i class="fa-solid fa-user-gear"></i>
+          <span>Profile & Capacity</span>
+        </li>
+        <li class="nav-link" data-view="gas-hub">
+          <i class="fa-solid fa-cloud-bolt"></i>
+          <span>Apps Script Hub</span>
+        </li>
+      </ul>
+
+      <div class="sidebar-footer">
+        <div class="connection-pill" id="backendStatusPill" title="Click to configure backend">
+          <span id="backendStatusText"><i class="fa-solid fa-database"></i> Local Storage Mode</span>
+          <div class="status-dot offline" id="backendStatusDot"></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ==========================================================================
+         MAIN CONTENT WRAPPER
+         ========================================================================== -->
+    <div class="main-wrapper">
+      <!-- Top Header -->
+      <header class="top-header">
+        <div class="header-left">
+          <button class="mobile-toggle" id="mobileMenuBtn" aria-label="Toggle Navigation">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div class="page-title">
+            <h2 id="viewTitle">Financial Dashboard</h2>
+            <p id="viewSubtitle">Overview of your savings goals and AI reality check metrics</p>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button class="btn btn-primary btn-sm" id="quickDepositBtn">
+            <i class="fa-solid fa-arrow-down-to-bracket"></i>
+            <span>Log Savings</span>
+          </button>
+
+          <div class="user-badge" id="headerUserBadge" data-view="profile">
+            <div class="user-avatar" id="headerUserAvatar">AS</div>
+            <span class="user-name" id="headerUserName">Aarav Sharma</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content Views Container -->
+      <main class="content-body">
+        
+        <!-- ====================================================================
+             VIEW 1: DASHBOARD
+             ==================================================================== -->
+        <section class="view-section active" id="view-dashboard">
+          <!-- KPI Row -->
+          <div class="grid-kpi">
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span>Total Active Goals</span>
+                <div class="kpi-icon"><i class="fa-solid fa-bullseye" style="color: #6366f1;"></i></div>
+              </div>
+              <div class="kpi-value" id="kpiActiveGoals">0</div>
+              <div class="kpi-subtext" id="kpiTotalGoalsText">0 total recorded</div>
+            </div>
+
+            <div class="kpi-card kpi-success">
+              <div class="kpi-header">
+                <span>Total Accumulated</span>
+                <div class="kpi-icon"><i class="fa-solid fa-vault" style="color: #10b981;"></i></div>
+              </div>
+              <div class="kpi-value" id="kpiTotalSavings">₹0</div>
+              <div class="kpi-subtext" id="kpiOverallProgress">0% of total targets</div>
+            </div>
+
+            <div class="kpi-card kpi-cyan">
+              <div class="kpi-header">
+                <span>Total Target Amount</span>
+                <div class="kpi-icon"><i class="fa-solid fa-flag-checkered" style="color: #06b6d4;"></i></div>
+              </div>
+              <div class="kpi-value" id="kpiTotalTarget">₹0</div>
+              <div class="kpi-subtext" id="kpiCompletedGoals">0 completed</div>
+            </div>
+
+            <div class="kpi-card kpi-danger">
+              <div class="kpi-header">
+                <span>At-Risk / Needs Calibration</span>
+                <div class="kpi-icon"><i class="fa-solid fa-triangle-exclamation" style="color: #ef4444;"></i></div>
+              </div>
+              <div class="kpi-value" id="kpiAtRiskGoals">0</div>
+              <div class="kpi-subtext">Actionable recalibration needed</div>
+            </div>
+          </div>
+
+          <!-- Overall Portfolio Progress Bar -->
+          <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-header">
+              <div>
+                <div class="card-title"><i class="fa-solid fa-bars-progress" style="color: var(--accent-primary);"></i> Overall Savings Target Progress</div>
+                <div class="card-subtitle">Real-time aggregate across all active financial targets</div>
+              </div>
+              <span class="reality-score-badge score-good" id="dashboardAvgScoreBadge">Avg Score: 85/100</span>
+            </div>
+            <div class="progress-container" style="height: 12px; margin-bottom: 0.75rem;">
+              <div class="progress-bar" id="dashboardOverallProgressBar" style="width: 0%;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--text-secondary);">
+              <span id="dashboardProgressSavedLabel">Saved: ₹0</span>
+              <span id="dashboardProgressTargetLabel">Target: ₹0</span>
+            </div>
+          </div>
+
+          <!-- Charts Row -->
+          <div class="grid-2col">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><i class="fa-solid fa-chart-pie" style="color: var(--accent-secondary);"></i> Goals Portfolio Distribution</div>
+              </div>
+              <div style="height: 250px; position: relative;">
+                <canvas id="dashboardGoalsChart"></canvas>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><i class="fa-solid fa-bell" style="color: var(--accent-amber);"></i> Upcoming Deadlines & Alerts</div>
+              </div>
+              <div id="dashboardAlertsList" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Active Goals Highlights -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title"><i class="fa-solid fa-layer-group" style="color: var(--accent-primary);"></i> Priority Savings Targets</div>
+                <div class="card-subtitle">Deterministic Reality Status & AI Feasibility Ratings</div>
+              </div>
+              <button class="btn btn-secondary btn-sm" data-view="create-goal">
+                <i class="fa-solid fa-plus"></i> New Goal
+              </button>
+            </div>
+            <div class="goals-grid" id="dashboardGoalsGrid">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             VIEW 2: CREATE GOAL
+             ==================================================================== -->
+        <section class="view-section" id="view-create-goal">
+          <div class="grid-2col">
+            <!-- Form Card -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title"><i class="fa-solid fa-plus-circle" style="color: var(--accent-primary);"></i> Create New Savings Goal</div>
+                  <div class="card-subtitle">Enter your goal details for instantaneous reality check calculation</div>
+                </div>
+              </div>
+
+              <form id="createGoalForm">
+                <div class="form-group">
+                  <label class="form-label" for="goalNameInput">Goal Name *</label>
+                  <input type="text" class="form-control" id="goalNameInput" placeholder="e.g. MacBook Pro M3, Emergency Fund" required>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="goalPurposeInput">Goal Purpose / Category *</label>
+                    <select class="form-control" id="goalPurposeInput" required>
+                      <option value="Laptop Purchase">Laptop Purchase</option>
+                      <option value="Emergency Fund">Emergency Fund</option>
+                      <option value="Education">Education & Courses</option>
+                      <option value="Vacation">Vacation / Travel</option>
+                      <option value="New Phone">New Phone / Electronics</option>
+                      <option value="Personal Project">Personal Project</option>
+                      <option value="Vehicle">Vehicle / Bike</option>
+                      <option value="Real Estate">Real Estate / Deposit</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="goalDeadlineInput">Target Deadline *</label>
+                    <input type="date" class="form-control" id="goalDeadlineInput" required>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="goalTargetInput">Target Amount (₹) *</label>
+                    <div class="input-addon-wrapper">
+                      <span class="input-addon-left">₹</span>
+                      <input type="number" class="form-control" id="goalTargetInput" placeholder="100000" min="1" required>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="goalCurrentInput">Current Savings (₹)</label>
+                    <div class="input-addon-wrapper">
+                      <span class="input-addon-left">₹</span>
+                      <input type="number" class="form-control" id="goalCurrentInput" placeholder="0" min="0" value="0">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="goalCapacityInput">Monthly Saving Capacity for this Goal (₹) *</label>
+                  <div class="input-addon-wrapper">
+                    <span class="input-addon-left">₹</span>
+                    <input type="number" class="form-control" id="goalCapacityInput" placeholder="10000" min="1" required>
+                  </div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
+                    Your total monthly saving capacity: <span id="formUserTotalCapacity">₹20,000</span>
+                  </div>
+                </div>
+
+                <div class="form-group" style="display: flex; align-items: center; gap: 0.6rem; margin-top: 0.5rem;">
+                  <input type="checkbox" id="goalEmailAlertInput" checked style="width: 18px; height: 18px; accent-color: var(--accent-primary); cursor: pointer;">
+                  <label for="goalEmailAlertInput" style="font-size: 0.85rem; color: var(--text-secondary); cursor: pointer;">
+                    Enable Automated Gmail Reminders & Deadline Notifications
+                  </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+                  <i class="fa-solid fa-check"></i> Save Goal & Track Reality Check
+                </button>
+              </form>
+            </div>
+
+            <!-- Live Reality Check Preview Panel -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title"><i class="fa-solid fa-bolt" style="color: var(--accent-amber);"></i> Real-Time Feasibility Preview</div>
+                  <div class="card-subtitle">Calculated dynamically as you enter data</div>
+                </div>
+                <span class="badge badge-on-track" id="previewStatusBadge">ON TRACK</span>
+              </div>
+
+              <div style="display: flex; align-items: center; justify-content: space-around; padding: 1.5rem 0; background: rgba(0,0,0,0.2); border-radius: var(--radius-md); margin-bottom: 1.25rem;">
+                <div class="score-circular" id="previewScoreCircle">
+                  <div class="score-circular-num" id="previewScoreNum">88</div>
+                  <div class="score-circular-label">Score / 100</div>
+                </div>
+                <div style="max-width: 200px;">
+                  <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Feasibility Rating</div>
+                  <div style="font-size: 1.1rem; font-weight: 700; color: #10b981;" id="previewGradeText">Highly Achievable</div>
+                  <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.25rem;" id="previewTimelineText">8.5 months runway</div>
+                </div>
+              </div>
+
+              <div class="reality-preview-grid">
+                <div class="stat-item" style="background: rgba(255,255,255,0.03); padding: 0.75rem; border-radius: var(--radius-sm);">
+                  <span class="stat-label">Remaining Balance</span>
+                  <span class="stat-val" id="previewRemainingVal">₹80,000</span>
+                </div>
+                <div class="stat-item" style="background: rgba(255,255,255,0.03); padding: 0.75rem; border-radius: var(--radius-sm);">
+                  <span class="stat-label">Required / Month</span>
+                  <span class="stat-val" id="previewRequiredVal">₹9,412</span>
+                </div>
+                <div class="stat-item" style="background: rgba(255,255,255,0.03); padding: 0.75rem; border-radius: var(--radius-sm);">
+                  <span class="stat-label">Your Capacity</span>
+                  <span class="stat-val" id="previewCapacityVal">₹15,000</span>
+                </div>
+                <div class="stat-item" style="background: rgba(255,255,255,0.03); padding: 0.75rem; border-radius: var(--radius-sm);">
+                  <span class="stat-label">Monthly Surplus/Gap</span>
+                  <span class="stat-val" id="previewSurplusVal" style="color: #10b981;">+₹5,588</span>
+                </div>
+              </div>
+
+              <div class="ai-advisor-card" style="margin-top: 1.25rem; padding: 1.1rem;">
+                <div class="ai-header" style="margin-bottom: 0.5rem;">
+                  <div class="ai-sparkle"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                  <span style="font-size: 0.88rem; font-weight: 600;">Instant AI Reality Verdict</span>
+                </div>
+                <div class="ai-content" id="previewAIAdviceText" style="font-size: 0.84rem;">
+                  Enter goal parameters to calculate feasibility score and smart recommendations.
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             VIEW 3: MY GOALS
+             ==================================================================== -->
+        <section class="view-section" id="view-my-goals">
+          <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-header" style="flex-wrap: wrap; gap: 1rem;">
+              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;" id="goalsFilterContainer">
+                <button class="btn btn-secondary btn-sm active-filter" data-filter="all">All Goals (<span id="countFilterAll">0</span>)</button>
+                <button class="btn btn-secondary btn-sm" data-filter="On Track">On Track (<span id="countFilterOnTrack">0</span>)</button>
+                <button class="btn btn-secondary btn-sm" data-filter="Needs Adjustment">Needs Adjustment (<span id="countFilterAdjust">0</span>)</button>
+                <button class="btn btn-secondary btn-sm" data-filter="At Risk">At Risk (<span id="countFilterAtRisk">0</span>)</button>
+                <button class="btn btn-secondary btn-sm" data-filter="Completed">Completed (<span id="countFilterCompleted">0</span>)</button>
+              </div>
+
+              <button class="btn btn-primary btn-sm" data-view="create-goal">
+                <i class="fa-solid fa-circle-plus"></i> New Savings Goal
+              </button>
+            </div>
+          </div>
+
+          <div class="goals-grid" id="myGoalsGrid">
+            <!-- Populated via JavaScript -->
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             VIEW 4: GOAL DETAILS & ADAPTIVE INTELLIGENCE
+             ==================================================================== -->
+        <section class="view-section" id="view-goal-details">
+          <div style="margin-bottom: 1.25rem;">
+            <button class="btn btn-secondary btn-sm" id="backToGoalsBtn">
+              <i class="fa-solid fa-arrow-left"></i> Back to My Goals
+            </button>
+          </div>
+
+          <!-- Goal Detail Header Card -->
+          <div class="card" style="margin-bottom: 1.5rem;">
+            <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+              <div>
+                <span class="goal-category-tag" id="detailGoalPurpose">Laptop Purchase</span>
+                <h2 style="font-size: 1.6rem; font-weight: 700; margin: 0.2rem 0;" id="detailGoalName">MacBook Pro M3</h2>
+                <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                  Created: <span id="detailCreatedDate">2026-02-01</span> &bull; Deadline: <strong id="detailDeadline" style="color: var(--text-primary);">2026-11-30</strong> (<span id="detailDaysRemaining">70</span> days left)
+                </div>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 1.25rem;">
+                <div class="score-circular" id="detailScoreCircle">
+                  <div class="score-circular-num" id="detailScoreNum">88</div>
+                  <div class="score-circular-label">Score</div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                  <span class="badge badge-on-track" id="detailStatusBadge">ON TRACK</span>
+                  <button class="btn btn-primary btn-sm" id="detailDepositBtn">
+                    <i class="fa-solid fa-plus"></i> Log Deposit
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Main Progress Bar -->
+            <div style="margin-top: 1.5rem;">
+              <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.4rem;">
+                <span style="font-weight: 600;" id="detailProgressPercentText">46.4% Saved</span>
+                <span style="color: var(--text-secondary);" id="detailAmountsRatio">₹65,000 / ₹140,000</span>
+              </div>
+              <div class="progress-container" style="height: 10px;">
+                <div class="progress-bar" id="detailProgressBar" style="width: 46%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Key Financial Metrics Grid -->
+          <div class="grid-kpi" style="margin-bottom: 1.5rem;">
+            <div class="kpi-card">
+              <div class="kpi-header"><span>Target Amount</span><div class="kpi-icon"><i class="fa-solid fa-flag"></i></div></div>
+              <div class="kpi-value" id="detailTargetVal">₹140,000</div>
+              <div class="kpi-subtext">Original target goal</div>
+            </div>
+            <div class="kpi-card kpi-success">
+              <div class="kpi-header"><span>Current Savings</span><div class="kpi-icon"><i class="fa-solid fa-wallet"></i></div></div>
+              <div class="kpi-value" id="detailCurrentVal">₹65,000</div>
+              <div class="kpi-subtext">Accumulated balance</div>
+            </div>
+            <div class="kpi-card kpi-warning">
+              <div class="kpi-header"><span>Remaining Balance</span><div class="kpi-icon"><i class="fa-solid fa-hourglass-half"></i></div></div>
+              <div class="kpi-value" id="detailRemainingVal">₹75,000</div>
+              <div class="kpi-subtext">Left to achieve</div>
+            </div>
+            <div class="kpi-card kpi-cyan">
+              <div class="kpi-header"><span>Required Monthly</span><div class="kpi-icon"><i class="fa-solid fa-calculator"></i></div></div>
+              <div class="kpi-value" id="detailRequiredVal">₹9,375</div>
+              <div class="kpi-subtext">At current deadline</div>
+            </div>
+          </div>
+
+          <!-- Adaptive Savings Callout Box -->
+          <div class="card" id="detailAdaptiveCallout" style="margin-bottom: 1.5rem; background: rgba(99, 102, 241, 0.08); border-left: 4px solid var(--accent-primary);">
+            <div style="display: flex; align-items: flex-start; gap: 0.85rem;">
+              <div style="font-size: 1.3rem; color: var(--accent-primary);"><i class="fa-solid fa-sliders"></i></div>
+              <div>
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: #fff;">Adaptive Recalibration Status</h4>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;" id="detailAdaptiveText">
+                  Your savings plan adapts dynamically with every recorded deposit.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4 Score Pillars Breakdown -->
+          <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-header">
+              <div class="card-title"><i class="fa-solid fa-gauge-high" style="color: var(--accent-secondary);"></i> Goal Reality Score Pillars (0–100 Algorithm)</div>
+            </div>
+            <div class="grid-kpi" style="margin-bottom: 0;">
+              <div style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: var(--radius-md);">
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.4rem;">
+                  <span>1. Savings Progress</span>
+                  <strong id="pillarProgressScore">14 / 30 pts</strong>
+                </div>
+                <div class="progress-container"><div class="progress-bar" id="pillarProgressBar" style="width: 46%;"></div></div>
+              </div>
+
+              <div style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: var(--radius-md);">
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.4rem;">
+                  <span>2. Capacity vs Required</span>
+                  <strong id="pillarCapacityScore">45 / 45 pts</strong>
+                </div>
+                <div class="progress-container"><div class="progress-bar success" id="pillarCapacityBar" style="width: 100%;"></div></div>
+              </div>
+
+              <div style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: var(--radius-md);">
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.4rem;">
+                  <span>3. Time Runway Buffer</span>
+                  <strong id="pillarTimeScore">15 / 15 pts</strong>
+                </div>
+                <div class="progress-container"><div class="progress-bar cyan" id="pillarTimeBar" style="width: 100%;"></div></div>
+              </div>
+
+              <div style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: var(--radius-md);">
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.4rem;">
+                  <span>4. Income Feasibility</span>
+                  <strong id="pillarBudgetScore">10 / 10 pts</strong>
+                </div>
+                <div class="progress-container"><div class="progress-bar warning" id="pillarBudgetBar" style="width: 100%;"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts & History Row -->
+          <div class="grid-2col" style="margin-bottom: 1.5rem;">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><i class="fa-solid fa-chart-line" style="color: var(--accent-emerald);"></i> Savings Accumulation Trajectory</div>
+              </div>
+              <div style="height: 250px;">
+                <canvas id="detailTimelineChart"></canvas>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><i class="fa-solid fa-receipt" style="color: var(--accent-secondary);"></i> Deposit History</div>
+                <button class="btn btn-secondary btn-sm" id="detailHistoryDepositBtn">+ Add</button>
+              </div>
+              <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Amount</th>
+                      <th>Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody id="detailSavingsTableBody">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Smart Alternative Plans (Plan A, Plan B, Plan C) -->
+          <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-header">
+              <div>
+                <div class="card-title"><i class="fa-solid fa-route" style="color: var(--accent-amber);"></i> Smart Alternative Scenarios</div>
+                <div class="card-subtitle">Automated structural options to guarantee goal achievement</div>
+              </div>
+            </div>
+            <div class="alternatives-grid" id="detailAlternativesGrid">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- Groq AI Strategic Guidance Box -->
+          <div class="ai-advisor-card">
+            <div class="ai-header" style="justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div class="ai-sparkle"><i class="fa-solid fa-robot"></i></div>
+                <div>
+                  <h3 style="margin: 0; font-size: 1.05rem;">Groq AI Strategic Goal Assessment</h3>
+                  <div style="font-size: 0.75rem; color: #a5b4fc;">Deterministic metrics synthesized with LLM advisory</div>
+                </div>
+              </div>
+              <button class="btn btn-secondary btn-sm" id="refreshGoalAIBtn">
+                <i class="fa-solid fa-arrows-rotate"></i> Re-Analyze
+              </button>
+            </div>
+            <div class="ai-content" id="detailAIAdviceContent">
+              Analyzing goal with Groq AI...
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             VIEW 5: WHAT-IF SIMULATOR
+             ==================================================================== -->
+        <section class="view-section" id="view-what-if">
+          <div class="grid-2col">
+            <!-- Controls Card -->
+            <div class="simulator-card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title"><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--accent-primary);"></i> What-If Interactive Sandbox</div>
+                  <div class="card-subtitle">Simulate parameter adjustments to see live feasibility shifts</div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="whatIfGoalSelect">Select Base Goal to Simulate</label>
+                <select class="form-control" id="whatIfGoalSelect">
+                  <!-- Populated dynamically -->
+                </select>
+              </div>
+
+              <!-- Slider 1: Target Amount -->
+              <div class="slider-group">
+                <div class="slider-header">
+                  <span>Target Amount:</span>
+                  <strong id="whatIfTargetDisplay">₹140,000</strong>
+                </div>
+                <input type="range" class="range-slider" id="whatIfTargetSlider" min="10000" max="500000" step="5000" value="140000">
+              </div>
+
+              <!-- Slider 2: Current Savings -->
+              <div class="slider-group">
+                <div class="slider-header">
+                  <span>Current Savings (Simulate Lump-sum):</span>
+                  <strong id="whatIfSavingsDisplay">₹65,000</strong>
+                </div>
+                <input type="range" class="range-slider" id="whatIfSavingsSlider" min="0" max="500000" step="5000" value="65000">
+              </div>
+
+              <!-- Slider 3: Monthly Saving Capacity -->
+              <div class="slider-group">
+                <div class="slider-header">
+                  <span>Monthly Saving Allocation:</span>
+                  <strong id="whatIfCapacityDisplay">₹15,000/mo</strong>
+                </div>
+                <input type="range" class="range-slider" id="whatIfCapacitySlider" min="1000" max="100000" step="1000" value="15000">
+              </div>
+
+              <!-- Slider 4: Deadline Months -->
+              <div class="slider-group">
+                <div class="slider-header">
+                  <span>Simulate Timeline Horizon:</span>
+                  <strong id="whatIfMonthsDisplay">8 months</strong>
+                </div>
+                <input type="range" class="range-slider" id="whatIfMonthsSlider" min="1" max="36" step="1" value="8">
+              </div>
+
+              <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
+                <button class="btn btn-secondary btn-sm" id="resetWhatIfBtn" style="flex: 1;">
+                  <i class="fa-solid fa-rotate-left"></i> Reset to Original
+                </button>
+                <button class="btn btn-primary btn-sm" id="applyWhatIfAsGoalBtn" style="flex: 1;">
+                  <i class="fa-solid fa-check-double"></i> Save as Live Goal
+                </button>
+              </div>
+            </div>
+
+            <!-- Results & Comparison Card -->
+            <div class="simulator-card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title"><i class="fa-solid fa-scale-balanced" style="color: var(--accent-emerald);"></i> Simulation Feasibility Impact</div>
+                  <div class="card-subtitle">Real-time delta vs your baseline goal</div>
+                </div>
+                <span class="reality-score-badge score-excellent" id="whatIfScoreDeltaBadge">+0 pts</span>
+              </div>
+
+              <div class="compare-grid">
+                <div class="compare-box">
+                  <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Original Plan</div>
+                  <div style="font-size: 1.3rem; font-weight: 700; color: #cbd5e1;" id="whatIfOriginalScore">88 / 100</div>
+                  <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.25rem;" id="whatIfOriginalReq">Req: ₹9,375/mo</div>
+                </div>
+
+                <div class="compare-box simulated">
+                  <div style="font-size: 0.72rem; color: #34d399; text-transform: uppercase; font-weight: 600;">Simulated Outcome</div>
+                  <div style="font-size: 1.3rem; font-weight: 700; color: #10b981;" id="whatIfSimulatedScore">94 / 100</div>
+                  <div style="font-size: 0.78rem; color: #6ee7b7; margin-top: 0.25rem;" id="whatIfSimulatedReq">Req: ₹8,500/mo</div>
+                </div>
+              </div>
+
+              <div style="height: 180px; margin-bottom: 1rem;">
+                <canvas id="whatIfChartCanvas"></canvas>
+              </div>
+
+              <!-- AI Scenario Assessment -->
+              <div class="ai-advisor-card" style="padding: 1rem;">
+                <div class="ai-header" style="margin-bottom: 0.5rem;">
+                  <div class="ai-sparkle"><i class="fa-solid fa-lightbulb"></i></div>
+                  <span style="font-size: 0.88rem; font-weight: 600;">AI Scenario Comparison Verdict</span>
+                </div>
+                <div class="ai-content" id="whatIfAIVerdict" style="font-size: 0.82rem;">
+                  Adjust the sandbox sliders to evaluate alternative savings paths.
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             VIEW 6: EXPENSE & BUDGET ANALYSIS
+             ==================================================================== -->
+        <section class="view-section" id="view-expenses">
+          <!-- KPI Summary -->
+          <div class="grid-kpi">
+            <div class="kpi-card">
+              <div class="kpi-header"><span>Monthly Gross Income</span><div class="kpi-icon"><i class="fa-solid fa-money-bill-wave"></i></div></div>
+              <div class="kpi-value" id="expMonthlyIncome">₹75,000</div>
+              <div class="kpi-subtext">Base monthly earning</div>
+            </div>
+            <div class="kpi-card kpi-danger">
+              <div class="kpi-header"><span>Total Recorded Expenses</span><div class="kpi-icon"><i class="fa-solid fa-receipt"></i></div></div>
+              <div class="kpi-value" id="expTotalSpend">₹43,500</div>
+              <div class="kpi-subtext" id="expSpendRate">58% of monthly income</div>
+            </div>
+            <div class="kpi-card kpi-success">
+              <div class="kpi-header"><span>Net Disposable Savings</span><div class="kpi-icon"><i class="fa-solid fa-piggy-bank"></i></div></div>
+              <div class="kpi-value" id="expNetSavings">₹31,500</div>
+              <div class="kpi-subtext" id="expSavingsRate">42% savings rate</div>
+            </div>
+          </div>
+
+          <!-- Add Expense & 50/30/20 Charts -->
+          <div class="grid-2col" style="margin-bottom: 1.5rem;">
+            <!-- Add Expense Form -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><i class="fa-solid fa-cart-plus" style="color: var(--accent-primary);"></i> Log Monthly Expense</div>
+              </div>
+              <form id="addExpenseForm">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="expenseCategoryInput">Category *</label>
+                    <select class="form-control" id="expenseCategoryInput" required>
+                      <option value="Food">Food & Dining</option>
+                      <option value="Transport">Transport & Fuel</option>
+                      <option value="Bills">Bills & Utilities (Rent/Electricity)</option>
+                      <option value="Shopping">Shopping & Lifestyle</option>
+                      <option value="Entertainment">Entertainment & Subscriptions</option>
+                      <option value="Education">Education & Books</option>
+                      <option value="Other">Other Miscellaneous</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="expenseAmountInput">Amount (₹) *</label>
+                    <div class="input-addon-wrapper">
+                      <span class="input-addon-left">₹</span>
+                      <input type="number" class="form-control" id="expenseAmountInput" placeholder="2500" min="1" required>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="expenseDateInput">Date</label>
+                    <input type="date" class="form-control" id="expenseDateInput" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="expenseNotesInput">Notes / Description</label>
+                    <input type="text" class="form-control" id="expenseNotesInput" placeholder="e.g. Monthly Grocery Restock">
+                  </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                  <i class="fa-solid fa-plus"></i> Record Expense
+                </button>
+              </form>
+            </div>
+
+            <!-- Expense Category Donut Chart -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><i class="fa-solid fa-chart-pie" style="color: var(--accent-secondary);"></i> Category Breakdown</div>
+              </div>
+              <div style="height: 220px;">
+                <canvas id="expenseCategoryChartCanvas"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- 50/30/20 Rule Analysis & AI Insights -->
+          <div class="grid-2col" style="margin-bottom: 1.5rem;">
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title"><i class="fa-solid fa-scale-balanced" style="color: var(--accent-emerald);"></i> 50 / 30 / 20 Budget Rule Check</div>
+                  <div class="card-subtitle">Needs (50%) &bull; Wants (30%) &bull; Savings (20%)</div>
+                </div>
+              </div>
+              <div style="height: 220px;">
+                <canvas id="budgetRuleChartCanvas"></canvas>
+              </div>
+            </div>
+
+            <!-- Groq AI Expense Insights -->
+            <div class="ai-advisor-card">
+              <div class="ai-header">
+                <div class="ai-sparkle"><i class="fa-solid fa-sparkles"></i></div>
+                <div>
+                  <h3 style="font-size: 1rem; margin: 0;">AI Spending Optimization Insights</h3>
+                  <div style="font-size: 0.75rem; color: #a5b4fc;">Automated recommendations to boost goal capacity</div>
+                </div>
+              </div>
+              <div class="ai-content" id="expenseAIInsightsContent" style="font-size: 0.85rem;">
+                Analyzing your monthly spending habits...
+              </div>
+            </div>
+          </div>
+
+          <!-- Expense List Table -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><i class="fa-solid fa-list-check" style="color: var(--accent-primary);"></i> Recorded Expenses</div>
+            </div>
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Notes</th>
+                    <th>Amount</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="expensesTableBody">
+                  <!-- Populated via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             VIEW 7: AI FINANCIAL ADVISOR CHAT
+             ==================================================================== -->
+        <section class="view-section" id="view-ai-advisor">
+          <div class="card" style="max-width: 900px; margin: 0 auto;">
+            <div class="card-header">
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div class="brand-logo" style="width: 36px; height: 36px; font-size: 1rem;">
+                  <i class="fa-solid fa-robot"></i>
+                </div>
+                <div>
+                  <div class="card-title">SaveIQ Groq AI Financial Strategist</div>
+                  <div class="card-subtitle">Deterministic financial analysis paired with intelligent natural-language guidance</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Suggested Quick Chips -->
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.25rem;">
+              <button class="btn btn-secondary btn-sm ai-chip" data-prompt="How is the Goal Reality Score calculated in SaveIQ?">
+                🎯 Explain Goal Reality Score
+              </button>
+              <button class="btn btn-secondary btn-sm ai-chip" data-prompt="What is the best strategy for building a 6-month Emergency Fund?">
+                🛡️ Emergency Fund Strategy
+              </button>
+              <button class="btn btn-secondary btn-sm ai-chip" data-prompt="How do I apply the 50/30/20 budget rule to free up savings?">
+                📊 50/30/20 Optimization
+              </button>
+              <button class="btn btn-secondary btn-sm ai-chip" data-prompt="What should I do if my goal is marked At Risk?">
+                ⚠️ Fixing At-Risk Goals
+              </button>
+            </div>
+
+            <!-- Chat History Feed -->
+            <div id="aiChatFeed" style="display: flex; flex-direction: column; gap: 1rem; min-height: 320px; max-height: 460px; overflow-y: auto; padding: 1rem; background: rgba(0,0,0,0.25); border-radius: var(--radius-md); margin-bottom: 1.25rem;">
+              <div style="display: flex; gap: 0.75rem;">
+                <div class="ai-sparkle" style="width: 28px; height: 28px; font-size: 0.8rem; flex-shrink: 0;"><i class="fa-solid fa-robot"></i></div>
+                <div style="background: rgba(30, 41, 59, 0.8); padding: 0.85rem 1.1rem; border-radius: var(--radius-md); font-size: 0.88rem; color: #f1f5f9; line-height: 1.5; border: 1px solid var(--border-subtle);">
+                  Hello! I am your <strong>SaveIQ AI Financial Advisor</strong>. I use deterministic mathematical calculations from your goals and expenses to help you optimize deadlines, boost your Goal Reality Scores, and simulate smart alternative plans. What would you like guidance on today?
+                </div>
+              </div>
+            </div>
+
+            <!-- Chat Input Box -->
+            <form id="aiChatForm" style="display: flex; gap: 0.75rem;">
+              <input type="text" class="form-control" id="aiChatInput" placeholder="Ask a financial guidance question or query your goals..." required>
+              <button type="submit" class="btn btn-primary" id="aiChatSendBtn" style="flex-shrink: 0;">
+                <i class="fa-solid fa-paper-plane"></i> Send
+              </button>
+            </form>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             VIEW 8: PROFILE & SETTINGS
+             ==================================================================== -->
+        <section class="view-section" id="view-profile">
+          <div class="card" style="max-width: 650px; margin: 0 auto;">
+            <div class="card-header">
+              <div class="card-title"><i class="fa-solid fa-user-gear" style="color: var(--accent-primary);"></i> User Profile & Financial Baseline</div>
+            </div>
+
+            <form id="profileForm">
+              <div class="form-group">
+                <label class="form-label" for="profileName">Full Name *</label>
+                <input type="text" class="form-control" id="profileName" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="profileEmail">Email Address (For Gmail Automated Alerts) *</label>
+                <input type="email" class="form-control" id="profileEmail" required>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="profileIncome">Monthly Net Income (₹) *</label>
+                  <div class="input-addon-wrapper">
+                    <span class="input-addon-left">₹</span>
+                    <input type="number" class="form-control" id="profileIncome" min="1" required>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="profileCapacity">Total Monthly Saving Capacity (₹) *</label>
+                  <div class="input-addon-wrapper">
+                    <span class="input-addon-left">₹</span>
+                    <input type="number" class="form-control" id="profileCapacity" min="1" required>
+                  </div>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+                <i class="fa-solid fa-floppy-disk"></i> Update Profile Information
+              </button>
+            </form>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             VIEW 9: GOOGLE APPS SCRIPT & SHEETS HUB
+             ==================================================================== -->
+        <section class="view-section" id="view-gas-hub">
+          <div class="grid-2col">
+            <!-- Connection Setup -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title"><i class="fa-solid fa-cloud-bolt" style="color: var(--accent-secondary);"></i> Apps Script Web App Connection</div>
+                  <div class="card-subtitle">Connect your deployed Google Apps Script endpoint URL</div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="gasEndpointInput">Google Apps Script Web App URL</label>
+                <input type="url" class="form-control" id="gasEndpointInput" placeholder="https://script.google.com/macros/s/.../exec">
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem;">
+                  Leave blank to use instant Local Storage mock database mode.
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 0.75rem; margin-top: 1.25rem;">
+                <button class="btn btn-primary btn-sm" id="saveGasUrlBtn">
+                  <i class="fa-solid fa-plug"></i> Connect Endpoint
+                </button>
+                <button class="btn btn-secondary btn-sm" id="disconnectGasBtn">
+                  <i class="fa-solid fa-power-off"></i> Use Local Mode
+                </button>
+              </div>
+
+              <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(0,0,0,0.25); border-radius: var(--radius-md);">
+                <div style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; color: #fff;">
+                  ⚡ Quick Status Check:
+                </div>
+                <div style="font-size: 0.82rem; color: var(--text-secondary);" id="gasStatusReport">
+                  Running on fast, zero-config Local Storage database.
+                </div>
+              </div>
+            </div>
+
+            <!-- Database Architecture Card -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><i class="fa-solid fa-table-cells" style="color: var(--accent-emerald);"></i> Google Sheets 5-Table Database Schema</div>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.84rem;">
+                <div style="padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: var(--radius-sm);">
+                  <strong style="color: #6366f1;">1. Users Sheet:</strong> UserID, Name, Email, MonthlyIncome, MonthlySavingCapacity, CreatedDate
+                </div>
+                <div style="padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: var(--radius-sm);">
+                  <strong style="color: #10b981;">2. Goals Sheet:</strong> GoalID, UserID, GoalName, Purpose, TargetAmount, CurrentSavings, MonthlySavingCapacity, Deadline, Status, RealityScore, EmailAlert, CreatedDate
+                </div>
+                <div style="padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: var(--radius-sm);">
+                  <strong style="color: #06b6d4;">3. Savings Sheet:</strong> SavingID, GoalID, Date, Amount, Notes
+                </div>
+                <div style="padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: var(--radius-sm);">
+                  <strong style="color: #f59e0b;">4. Expenses Sheet:</strong> ExpenseID, UserID, Date, Category, Amount, Notes
+                </div>
+                <div style="padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: var(--radius-sm);">
+                  <strong style="color: #ef4444;">5. Alerts Sheet:</strong> AlertID, GoalID, UserID, AlertType, SentDate, Status
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL: QUICK DEPOSIT / LOG SAVINGS
+       ========================================================================== -->
+  <div class="modal-overlay" id="depositModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fa-solid fa-arrow-down-to-bracket" style="color: var(--accent-emerald);"></i> Log Savings Contribution</h3>
+        <button class="modal-close" id="closeDepositModalBtn">&times;</button>
+      </div>
+
+      <form id="depositForm">
+        <div class="form-group">
+          <label class="form-label" for="depositGoalSelect">Select Target Goal *</label>
+          <select class="form-control" id="depositGoalSelect" required>
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="depositAmountInput">Deposit Amount (₹) *</label>
+            <div class="input-addon-wrapper">
+              <span class="input-addon-left">₹</span>
+              <input type="number" class="form-control" id="depositAmountInput" placeholder="5000" min="1" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="depositDateInput">Date</label>
+            <input type="date" class="form-control" id="depositDateInput" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="depositNotesInput">Notes / Source</label>
+          <input type="text" class="form-control" id="depositNotesInput" placeholder="e.g. Monthly salary allotment, Freelance payment">
+        </div>
+
+        <!-- Adaptive Preview Callout inside modal -->
+        <div id="modalAdaptivePreview" style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-md); padding: 0.85rem; margin-bottom: 1.25rem; font-size: 0.82rem; color: #a7f3d0;">
+          <i class="fa-solid fa-sliders"></i> <strong>Adaptive Recalibration:</strong> Logging this deposit will automatically recalculate your remaining required monthly pace.
+        </div>
+
+        <button type="submit" class="btn btn-success" style="width: 100%;">
+          <i class="fa-solid fa-check"></i> Record Deposit & Recalibrate Plan
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Application Logic Scripts -->
+  <script src="js/calculations.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/ai-advisor.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

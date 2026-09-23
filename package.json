@@ -1,0 +1,15 @@
+{
+  "name": "saveiq",
+  "version": "1.0.0",
+  "description": "SaveIQ – AI Goal Reality & Smart Savings Planner",
+  "main": "index.html",
+  "scripts": {
+    "dev": "node server/src/server.js",
+    "server": "node server/src/server.js",
+    "client": "npx serve . -l 3000",
+    "start": "node server/src/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

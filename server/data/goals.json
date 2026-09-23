@@ -1,0 +1,47 @@
+[
+  {
+    "id": "GOAL_1790161756251",
+    "goalId": "GOAL_1790161756251",
+    "userId": "USR_001",
+    "goalName": "MacBook Pro M3",
+    "purpose": "Laptop Purchase",
+    "targetAmount": 150000,
+    "currentSavings": 50000,
+    "monthlySavingCapacity": 20000,
+    "deadline": "2027-04-30",
+    "status": "On Track",
+    "realityScore": 80,
+    "emailAlert": true,
+    "createdAt": "2026-09-23"
+  },
+  {
+    "id": "GOAL_1790162897140",
+    "goalId": "GOAL_1790162897140",
+    "userId": "USR_001",
+    "goalName": "Japan Trip 2027",
+    "purpose": "Vacation",
+    "targetAmount": 250000,
+    "currentSavings": 40000,
+    "monthlySavingCapacity": 25000,
+    "deadline": "2027-10-31",
+    "status": "On Track",
+    "realityScore": 75,
+    "emailAlert": true,
+    "createdAt": "2026-09-23"
+  },
+  {
+    "id": "GOAL_1790163801296",
+    "goalId": "GOAL_1790163801296",
+    "userId": "USR_001",
+    "goalName": "laptop",
+    "purpose": "Laptop Purchase",
+    "targetAmount": 10000,
+    "currentSavings": 0,
+    "monthlySavingCapacity": 1000,
+    "deadline": "2027-03-23",
+    "status": "At Risk",
+    "realityScore": 35,
+    "emailAlert": true,
+    "createdAt": "2026-09-23"
+  }
+]

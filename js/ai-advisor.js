@@ -32,16 +32,14 @@ const SaveIQAI = {
       }
     };
 
-    // If live Google Apps Script is available with Groq backend, invoke it
-    if (SaveIQAPI.isLiveBackend()) {
-      try {
-        const response = await SaveIQAPI.request('getAIRecommendation', payload);
-        if (response && response.data && response.data.recommendation) {
-          return response.data.recommendation;
-        }
-      } catch (err) {
-        console.warn('[SaveIQ AI] Backend AI request error, using smart local advisor:', err);
+    // Request AI from Node.js Groq REST backend
+    try {
+      const response = await SaveIQAPI.request('getAIRecommendation', payload);
+      if (response && response.data && response.data.recommendation) {
+        return response.data.recommendation;
       }
+    } catch (err) {
+      console.warn('[SaveIQ AI] Backend AI request error, using smart local advisor:', err);
     }
 
     // High-intelligence local rule-based advisor (Deterministic + Context-Aware)
@@ -54,22 +52,25 @@ const SaveIQAI = {
   async getWhatIfAdvice(whatIfResult, goalName) {
     const { base, simulated, simulatedParams, estimatedMonthsToComplete, scoreDiff } = whatIfResult;
     
-    // Check live backend
-    if (SaveIQAPI.isLiveBackend()) {
-      try {
-        const response = await SaveIQAPI.request('getAIRecommendation', {
-          action: 'getAIRecommendation',
-          type: 'what_if_analysis',
+    // Request AI from Node.js Groq REST backend
+    try {
+      const response = await SaveIQAPI.request('getAIRecommendation', {
+        action: 'getAIRecommendation',
+        type: 'what_if_analysis',
+        whatIfData: {
           goalName,
           base,
-          simulated
-        });
-        if (response && response.data && response.data.recommendation) {
-          return response.data.recommendation;
+          simulated,
+          simulatedParams,
+          estimatedMonthsToComplete,
+          scoreDiff
         }
-      } catch (err) {
-        console.warn('[SaveIQ AI] Live What-If AI error:', err);
+      });
+      if (response && response.data && response.data.recommendation) {
+        return response.data.recommendation;
       }
+    } catch (err) {
+      console.warn('[SaveIQ AI] What-If AI error:', err);
     }
 
     // Local smart generator
@@ -80,19 +81,17 @@ const SaveIQAI = {
    * Request AI expense & budget optimization analysis
    */
   async getExpenseAdvice(budgetAnalysis) {
-    if (SaveIQAPI.isLiveBackend()) {
-      try {
-        const response = await SaveIQAPI.request('getAIRecommendation', {
-          action: 'getAIRecommendation',
-          type: 'expense_analysis',
-          budgetAnalysis
-        });
-        if (response && response.data && response.data.recommendation) {
-          return response.data.recommendation;
-        }
-      } catch (err) {
-        console.warn('[SaveIQ AI] Live Expense AI error:', err);
+    try {
+      const response = await SaveIQAPI.request('getAIRecommendation', {
+        action: 'getAIRecommendation',
+        type: 'expense_analysis',
+        budgetAnalysis
+      });
+      if (response && response.data && response.data.recommendation) {
+        return response.data.recommendation;
       }
+    } catch (err) {
+      console.warn('[SaveIQ AI] Expense AI error:', err);
     }
 
     return this.generateSmartLocalExpenseAdvice(budgetAnalysis);
@@ -202,55 +201,100 @@ const SaveIQAI = {
   },
 
   /**
+   * Helper alias for What-If Verdict
+   */
+  generateWhatIfVerdict(baseGoal, simulatedGoal, baseEval, simEval) {
+    const scoreDiff = simEval.score - baseEval.score;
+    const requiredSavingDiff = simEval.requiredMonthlySaving - baseEval.requiredMonthlySaving;
+    const remaining = Math.max(0, Number(simulatedGoal.TargetAmount || simulatedGoal.targetAmount || 0) - Number(simulatedGoal.CurrentSavings || simulatedGoal.currentSavings || 0));
+    const cap = Number(simulatedGoal.MonthlySavingCapacity || simulatedGoal.monthlyCapacity || 1);
+    const estimatedMonthsToComplete = Math.max(1, Math.ceil(remaining / (cap || 1)));
+
+    const whatIfResult = {
+      base: baseEval,
+      simulated: simEval,
+      simulatedParams: {
+        monthlyCapacity: cap
+      },
+      estimatedMonthsToComplete,
+      scoreDiff,
+      requiredSavingDiff
+    };
+
+    return this.generateSmartLocalWhatIfAdvice(whatIfResult, baseGoal.GoalName || baseGoal.goalName || 'Goal');
+  },
+
+  /**
    * Free-form Financial Assistant Query
    */
   async askAdvisorQuestion(query, contextData = {}) {
-    if (SaveIQAPI.isLiveBackend()) {
-      try {
-        const response = await SaveIQAPI.request('getAIRecommendation', {
-          action: 'getAIRecommendation',
-          type: 'chat_query',
-          query,
-          contextData
-        });
-        if (response && response.data && response.data.recommendation) {
-          return response.data.recommendation;
-        }
-      } catch (err) {
-        console.warn('[SaveIQ AI] Live chat error, fallback to assistant:', err);
+    try {
+      const response = await SaveIQAPI.request('getAIRecommendation', {
+        action: 'getAIRecommendation',
+        type: 'chat_query',
+        query,
+        contextData
+      });
+      if (response && response.data && response.data.recommendation) {
+        return response.data.recommendation;
       }
+    } catch (err) {
+      console.warn('[SaveIQ AI] Backend chat request notice:', err);
     }
 
-    // Smart contextual responses for typical financial questions
-    const q = query.toLowerCase();
-    if (q.includes('emergency fund') || q.includes('emergency')) {
-      return `💡 **Emergency Fund Strategy**:\n` +
-             `- **Rule of Thumb**: Maintain 3 to 6 months of living expenses (Rent, Food, Utilities, Debt obligations) in a high-liquidity account.\n` +
-             `- **Why**: It protects your long-term savings goals from being liquidated prematurely during unforeseen events.\n` +
-             `- **Action in SaveIQ**: Set up a dedicated "Emergency Fund" goal with a high priority and automated monthly contributions.`;
+    // Smart contextual responses for financial questions
+    const q = (query || '').toLowerCase().trim();
+    const user = contextData.user || {};
+    const goals = contextData.goals || [];
+    const income = Number(user.MonthlyIncome) || 75000;
+    const capacity = Number(user.MonthlySavingCapacity) || 20000;
+
+    if (q.includes('emergency fund') || q.includes('emergency') || q.includes('safety fund')) {
+      return `### 🛡️ SaveIQ AI Emergency Fund Strategy\n\n` +
+             `- **Recommended Reserve**: 3 to 6 months of living expenses (approx. **₹${Math.round(income * 0.5 * 4).toLocaleString()}** for your current income level).\n` +
+             `- **Storage Instrument**: Maintain 70% in an instant-redemption High-Yield Liquid Mutual Fund or Sweep-in FD, and 30% in high-interest savings.\n` +
+             `- **Key Rule**: Never mix your emergency fund with discretionary savings goals (like gadgets or travel). Set it up as a high-priority baseline goal in SaveIQ.`;
     }
 
-    if (q.includes('reality score') || q.includes('score')) {
-      return `🎯 **How SaveIQ Calculates Your Goal Reality Score (0–100)**:\n` +
-             `SaveIQ uses a 4-pillar transparent evaluation:\n` +
-             `1. **Progress Factor (30 pts)**: How much of the target you have already saved.\n` +
-             `2. **Monthly Capacity vs Requirement (45 pts)**: Whether your monthly saving capacity covers the required rate.\n` +
-             `3. **Time Runway (15 pts)**: Sufficient timeline buffer before the deadline arrives.\n` +
-             `4. **Income Budget Feasibility (10 pts)**: Whether the commitment is healthy relative to your total monthly income.`;
+    if (q.includes('reality score') || q.includes('how is') && q.includes('score') || q.includes('calculate')) {
+      return `### 🎯 SaveIQ Deterministic Reality Score Framework (0–100)\n\n` +
+             `Your Goal Reality Score is calculated using 4 mathematical pillars without black-box bias:\n` +
+             `1. **Progress Ratio (30 pts)**: Percentage of the principal target already locked in.\n` +
+             `2. **Monthly Capacity vs Required Pace (45 pts)**: Whether your allocated monthly savings covers the monthly requirement.\n` +
+             `3. **Timeline Runway Buffer (15 pts)**: Number of months available to absorb emergency payment pauses.\n` +
+             `4. **Income Budget Feasibility (10 pts)**: Whether the monthly commitment is under 40% of total monthly income.`;
     }
 
-    if (q.includes('50/30/20') || q.includes('budget rule')) {
-      return `📋 **The 50/30/20 Budgeting Principle**:\n` +
-             `- **50% Needs**: Housing, groceries, utilities, minimum loan payments, essential transport.\n` +
-             `- **30% Wants**: Dining out, travel, entertainment, hobbies, gadgets.\n` +
-             `- **20% Savings & Debt Acceleration**: High-priority savings goals, investments, emergency buffer.\n` +
-             `Check the **Expense Analysis** tab to see your live breakdown!`;
+    if (q.includes('50/30/20') || q.includes('budget rule') || q.includes('budgeting')) {
+      return `### 📊 The 50/30/20 Wealth Blueprint\n\n` +
+             `Based on your monthly income of **₹${income.toLocaleString()}**:\n` +
+             `- **50% Needs (₹${Math.round(income * 0.5).toLocaleString()})**: Rent, groceries, electricity, essential commute, minimum loan EMIs.\n` +
+             `- **30% Wants (₹${Math.round(income * 0.3).toLocaleString()})**: Dining out, weekend getaways, subscriptions, shopping.\n` +
+             `- **20% Savings (₹${Math.round(income * 0.2).toLocaleString()})**: Active SaveIQ goals, emergency corpus, long-term equity SIPs.\n\n` +
+             `💡 *Tip: Head to the **Expense & Budget Analysis** view to track your actual spend ratios!*`;
     }
 
-    return `🤖 **SaveIQ AI Financial Advisor**:\n\n` +
-           `Regarding: *"${query}"*\n\n` +
-           `- **Smart Savings Principle**: Consistency always outperforms timing. Automating even ₹1,000 to ₹5,000 at the start of each month significantly reduces goal completion risk.\n` +
-           `- **Reality Check Strategy**: Whenever your monthly income or expenses shift, run a quick **What-If simulation** on your highest-priority goal to ensure your deadline remains realistic.\n` +
-           `- **Next Step**: You can inspect each goal's personalized AI analysis directly in the **Goal Details** view!`;
+    if (q.includes('at risk') || q.includes('risk') || q.includes('fix') || q.includes('shortfall')) {
+      return `### ⚠️ Strategic Recovery Plan for At-Risk Goals\n\n` +
+             `When a goal has a Reality Score under 65, here is your 3-step action plan:\n` +
+             `1. **Run a What-If Simulation**: Open the **What-If Sandbox** to test if adding 2 to 4 months to the deadline brings required savings in line with your capacity.\n` +
+             `2. **Discretionary Trim**: Look at your expense breakdown and trim dining out or shopping by 15% to channel an extra ₹2,000–₹5,000/mo into the deficit goal.\n` +
+             `3. **Adopt Alternative Plan A or B**: In **Goal Details**, click **Adopt Plan A** to auto-recalibrate your target deadline.`;
+    }
+
+    if (q.includes('invest') || q.includes('investment') || q.includes('returns') || q.includes('stocks') || q.includes('mutual fund')) {
+      return `### 📈 Goal-Horizon Investment Allocation Guide\n\n` +
+             `- **Short Term (< 1 Year)**: High-safety capital preservation (Arbitrage funds, Liquid funds, Bank Recurring Deposits).\n` +
+             `- **Medium Term (1 to 3 Years)**: Short-duration debt funds, conservative hybrid or multi-asset funds.\n` +
+             `- **Long Term (3+ Years)**: Broad-market index funds (Nifty 50 / S&P 500) and flexi-cap mutual funds to outpace inflation.\n\n` +
+             `*Always align target dates with risk tolerance.*`;
+    }
+
+    // Default intelligent guidance
+    return `### 🤖 SaveIQ AI Financial Advisor\n\n` +
+           `Regarding: **"${query}"**\n\n` +
+           `- **Active Portfolio Status**: You currently have **${goals.length} active goals** with a monthly saving baseline of **₹${capacity.toLocaleString()}/month**.\n` +
+           `- **Strategic Savings Rule**: Automate savings on salary day before discretionary spending begins. Automated consistency yields 3.4x higher goal completion rates.\n` +
+           `- **Action Suggestion**: You can inspect each goal's personalized score breakdown in the **Goal Details** tab or simulate changes in the **What-If Sandbox**!`;
   }
 };

@@ -16,10 +16,29 @@
   
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <!-- Firebase Web App SDK (Compat v10 for browser execution) -->
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDVAe8EMrJLJUtGx0RAAt3dL3dgFY7kFsc",
+      authDomain: "savelq.firebaseapp.com",
+      projectId: "savelq",
+      storageBucket: "savelq.firebasestorage.app",
+      messagingSenderId: "746264460854",
+      appId: "1:746264460854:web:24816c26b2035c89bc6297",
+      measurementId: "G-FSVTBHFRT2"
+    };
+    if (window.firebase && !firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+  </script>
   
   <!-- App Stylesheets -->
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/style.css?v=2.0.2">
+  <link rel="stylesheet" href="css/components.css?v=2.0.2">
 </head>
 <body>
 
@@ -63,20 +82,25 @@
           <i class="fa-solid fa-robot"></i>
           <span>AI Financial Advisor</span>
         </li>
+        <li class="nav-link" data-view="notifications">
+          <i class="fa-solid fa-bell"></i>
+          <span>Notifications</span>
+          <span class="badge badge-needs-adjustment" id="sidebarNotifBadge" style="margin-left: auto; font-size: 0.7rem; padding: 0.15rem 0.45rem; display: none;">0</span>
+        </li>
         <li class="nav-link" data-view="profile">
           <i class="fa-solid fa-user-gear"></i>
           <span>Profile & Capacity</span>
         </li>
         <li class="nav-link" data-view="gas-hub">
-          <i class="fa-solid fa-cloud-bolt"></i>
-          <span>Apps Script Hub</span>
+          <i class="fa-solid fa-server"></i>
+          <span>Backend & Cloud Hub</span>
         </li>
       </ul>
 
       <div class="sidebar-footer">
-        <div class="connection-pill" id="backendStatusPill" title="Click to configure backend">
-          <span id="backendStatusText"><i class="fa-solid fa-database"></i> Local Storage Mode</span>
-          <div class="status-dot offline" id="backendStatusDot"></div>
+        <div class="connection-pill" id="backendStatusPill" title="Click to view Node.js & Firebase backend status">
+          <span id="backendStatusText"><i class="fa-brands fa-node-js"></i> Node.js REST API</span>
+          <div class="status-dot" id="backendStatusDot" style="background-color: #10b981; box-shadow: 0 0 8px #10b981;"></div>
         </div>
       </div>
     </aside>
@@ -103,9 +127,68 @@
             <span>Log Savings</span>
           </button>
 
-          <div class="user-badge" id="headerUserBadge" data-view="profile">
-            <div class="user-avatar" id="headerUserAvatar">AS</div>
-            <span class="user-name" id="headerUserName">Aarav Sharma</span>
+          <!-- Notification Bell Wrapper -->
+          <div class="notification-wrapper">
+            <button class="notif-bell-btn" id="headerNotifBellBtn" title="Notifications" aria-label="Open notifications">
+              <i class="fa-solid fa-bell"></i>
+              <span class="notif-badge hidden" id="headerNotifBadge">0</span>
+            </button>
+
+            <div class="notif-dropdown" id="headerNotifDropdown">
+              <div class="notif-dropdown-header">
+                <div class="notif-dropdown-title">
+                  <i class="fa-solid fa-bell" style="color: var(--accent-primary);"></i>
+                  <span>Notifications</span>
+                </div>
+                <div class="notif-dropdown-actions">
+                  <button class="btn btn-secondary btn-sm" id="dropdownMarkAllReadBtn" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">Mark all read</button>
+                </div>
+              </div>
+              <div class="notif-filter-tabs">
+                <button class="notif-filter-btn active" data-filter="all">All</button>
+                <button class="notif-filter-btn" data-filter="unread">Unread</button>
+              </div>
+              <div class="notif-list" id="dropdownNotifList">
+                <!-- Populated via JavaScript -->
+              </div>
+              <div class="notif-dropdown-footer">
+                <a href="#" id="dropdownViewAllLink">View All Notifications &rarr;</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- User Menu Dropdown -->
+          <div class="user-menu-wrapper">
+            <div class="user-badge" id="headerUserBadge" style="cursor: pointer;">
+              <div class="user-avatar" id="headerUserAvatar">AS</div>
+              <span class="user-name" id="headerUserName">Aarav Sharma</span>
+              <i class="fa-solid fa-chevron-down" style="font-size: 0.75rem; color: var(--text-muted); margin-left: 0.25rem;"></i>
+            </div>
+
+            <div class="user-menu-dropdown" id="headerUserDropdown">
+              <div class="user-menu-header">
+                <div class="user-menu-name" id="userMenuFullName">Aarav Sharma</div>
+                <div class="user-menu-email" id="userMenuEmail">aarav.sharma@example.com</div>
+              </div>
+              <div class="user-menu-links">
+                <button class="user-menu-item" data-view="profile">
+                  <i class="fa-solid fa-user-gear" style="color: var(--accent-primary);"></i>
+                  <span>Profile & Capacity</span>
+                </button>
+                <button class="user-menu-item" data-view="notifications">
+                  <i class="fa-solid fa-bell" style="color: var(--accent-secondary);"></i>
+                  <span>Notifications</span>
+                </button>
+                <button class="user-menu-item" id="menuSwitchAccountBtn">
+                  <i class="fa-solid fa-users" style="color: var(--accent-purple);"></i>
+                  <span>Switch Account</span>
+                </button>
+                <button class="user-menu-item logout" id="headerLogoutBtn">
+                  <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                  <span>Logout</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </header>
@@ -180,7 +263,7 @@
               <div class="card-header">
                 <div class="card-title"><i class="fa-solid fa-chart-pie" style="color: var(--accent-secondary);"></i> Goals Portfolio Distribution</div>
               </div>
-              <div style="height: 250px; position: relative;">
+              <div style="height: 190px; position: relative;">
                 <canvas id="dashboardGoalsChart"></canvas>
               </div>
             </div>
@@ -216,6 +299,11 @@
              VIEW 2: CREATE GOAL
              ==================================================================== -->
         <section class="view-section" id="view-create-goal">
+          <div style="margin-bottom: 1.25rem;">
+            <button class="btn btn-secondary btn-sm" onclick="SaveIQApp.navigateTo('my-goals')" data-view="my-goals">
+              <i class="fa-solid fa-arrow-left"></i> Back to My Goals
+            </button>
+          </div>
           <div class="grid-2col">
             <!-- Form Card -->
             <div class="card">
@@ -379,9 +467,12 @@
              VIEW 4: GOAL DETAILS & ADAPTIVE INTELLIGENCE
              ==================================================================== -->
         <section class="view-section" id="view-goal-details">
-          <div style="margin-bottom: 1.25rem;">
-            <button class="btn btn-secondary btn-sm" id="backToGoalsBtn">
+          <div style="margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center;">
+            <button class="btn btn-secondary btn-sm" id="backToGoalsBtn" onclick="SaveIQApp.navigateTo('my-goals')" data-view="my-goals">
               <i class="fa-solid fa-arrow-left"></i> Back to My Goals
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="SaveIQApp.openDepositModal()">
+              <i class="fa-solid fa-arrow-down-to-bracket"></i> Log Deposit
             </button>
           </div>
 
@@ -451,7 +542,7 @@
             <div style="display: flex; align-items: flex-start; gap: 0.85rem;">
               <div style="font-size: 1.3rem; color: var(--accent-primary);"><i class="fa-solid fa-sliders"></i></div>
               <div>
-                <h4 style="font-size: 0.95rem; font-weight: 700; color: #fff;">Adaptive Recalibration Status</h4>
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary);">Adaptive Recalibration Status</h4>
                 <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;" id="detailAdaptiveText">
                   Your savings plan adapts dynamically with every recorded deposit.
                 </p>
@@ -505,7 +596,7 @@
               <div class="card-header">
                 <div class="card-title"><i class="fa-solid fa-chart-line" style="color: var(--accent-emerald);"></i> Savings Accumulation Trajectory</div>
               </div>
-              <div style="height: 250px;">
+              <div style="height: 190px; position: relative;">
                 <canvas id="detailTimelineChart"></canvas>
               </div>
             </div>
@@ -551,8 +642,8 @@
               <div style="display: flex; align-items: center; gap: 0.75rem;">
                 <div class="ai-sparkle"><i class="fa-solid fa-robot"></i></div>
                 <div>
-                  <h3 style="margin: 0; font-size: 1.05rem;">Groq AI Strategic Goal Assessment</h3>
-                  <div style="font-size: 0.75rem; color: #a5b4fc;">Deterministic metrics synthesized with LLM advisory</div>
+                  <h3 style="margin: 0; font-size: 1.05rem; color: #1e1b4b;">Groq AI Strategic Goal Assessment</h3>
+                  <div style="font-size: 0.75rem; color: #4f46e5; font-weight: 500;">Deterministic metrics synthesized with LLM advisory</div>
                 </div>
               </div>
               <button class="btn btn-secondary btn-sm" id="refreshGoalAIBtn">
@@ -563,12 +654,23 @@
               Analyzing goal with Groq AI...
             </div>
           </div>
+
+          <div style="margin-top: 1.5rem; text-align: center;">
+            <button class="btn btn-secondary" onclick="SaveIQApp.navigateTo('my-goals')" data-view="my-goals">
+              <i class="fa-solid fa-arrow-left"></i> Back to My Goals
+            </button>
+          </div>
         </section>
 
         <!-- ====================================================================
              VIEW 5: WHAT-IF SIMULATOR
              ==================================================================== -->
         <section class="view-section" id="view-what-if">
+          <div style="margin-bottom: 1.25rem;">
+            <button class="btn btn-secondary btn-sm" onclick="SaveIQApp.navigateTo('my-goals')" data-view="my-goals">
+              <i class="fa-solid fa-arrow-left"></i> Back to Goals
+            </button>
+          </div>
           <div class="grid-2col">
             <!-- Controls Card -->
             <div class="simulator-card">
@@ -678,6 +780,11 @@
              VIEW 6: EXPENSE & BUDGET ANALYSIS
              ==================================================================== -->
         <section class="view-section" id="view-expenses">
+          <div style="margin-bottom: 1.25rem;">
+            <button class="btn btn-secondary btn-sm" onclick="SaveIQApp.navigateTo('dashboard')" data-view="dashboard">
+              <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+            </button>
+          </div>
           <!-- KPI Summary -->
           <div class="grid-kpi">
             <div class="kpi-card">
@@ -749,7 +856,7 @@
               <div class="card-header">
                 <div class="card-title"><i class="fa-solid fa-chart-pie" style="color: var(--accent-secondary);"></i> Category Breakdown</div>
               </div>
-              <div style="height: 220px;">
+              <div style="height: 190px; position: relative;">
                 <canvas id="expenseCategoryChartCanvas"></canvas>
               </div>
             </div>
@@ -764,7 +871,7 @@
                   <div class="card-subtitle">Needs (50%) &bull; Wants (30%) &bull; Savings (20%)</div>
                 </div>
               </div>
-              <div style="height: 220px;">
+              <div style="height: 190px; position: relative;">
                 <canvas id="budgetRuleChartCanvas"></canvas>
               </div>
             </div>
@@ -774,11 +881,11 @@
               <div class="ai-header">
                 <div class="ai-sparkle"><i class="fa-solid fa-sparkles"></i></div>
                 <div>
-                  <h3 style="font-size: 1rem; margin: 0;">AI Spending Optimization Insights</h3>
-                  <div style="font-size: 0.75rem; color: #a5b4fc;">Automated recommendations to boost goal capacity</div>
+                  <h3 style="font-size: 1rem; margin: 0; color: #1e1b4b;">AI Spending Optimization Insights</h3>
+                  <div style="font-size: 0.75rem; color: #4f46e5; font-weight: 500;">Automated recommendations to boost goal capacity</div>
                 </div>
               </div>
-              <div class="ai-content" id="expenseAIInsightsContent" style="font-size: 0.85rem;">
+              <div class="ai-content" id="expenseAIInsightsContent" style="font-size: 0.85rem; color: #334155;">
                 Analyzing your monthly spending habits...
               </div>
             </div>
@@ -812,6 +919,11 @@
              VIEW 7: AI FINANCIAL ADVISOR CHAT
              ==================================================================== -->
         <section class="view-section" id="view-ai-advisor">
+          <div style="margin-bottom: 1.25rem; max-width: 900px; margin-left: auto; margin-right: auto;">
+            <button class="btn btn-secondary btn-sm" onclick="SaveIQApp.navigateTo('dashboard')" data-view="dashboard">
+              <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+            </button>
+          </div>
           <div class="card" style="max-width: 900px; margin: 0 auto;">
             <div class="card-header">
               <div style="display: flex; align-items: center; gap: 0.75rem;">
@@ -865,6 +977,11 @@
              VIEW 8: PROFILE & SETTINGS
              ==================================================================== -->
         <section class="view-section" id="view-profile">
+          <div style="margin-bottom: 1.25rem; max-width: 650px; margin-left: auto; margin-right: auto;">
+            <button class="btn btn-secondary btn-sm" onclick="SaveIQApp.navigateTo('dashboard')" data-view="dashboard">
+              <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+            </button>
+          </div>
           <div class="card" style="max-width: 650px; margin: 0 auto;">
             <div class="card-header">
               <div class="card-title"><i class="fa-solid fa-user-gear" style="color: var(--accent-primary);"></i> User Profile & Financial Baseline</div>
@@ -907,30 +1024,35 @@
         </section>
 
         <!-- ====================================================================
-             VIEW 9: GOOGLE APPS SCRIPT & SHEETS HUB
+             VIEW 9: NODE.JS REST API & CLOUD FIRESTORE HUB
              ==================================================================== -->
         <section class="view-section" id="view-gas-hub">
+          <div style="margin-bottom: 1.25rem;">
+            <button class="btn btn-secondary btn-sm" onclick="SaveIQApp.navigateTo('dashboard')" data-view="dashboard">
+              <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+            </button>
+          </div>
           <div class="grid-2col">
             <!-- Connection Setup -->
             <div class="card">
               <div class="card-header">
                 <div>
-                  <div class="card-title"><i class="fa-solid fa-cloud-bolt" style="color: var(--accent-secondary);"></i> Apps Script Web App Connection</div>
-                  <div class="card-subtitle">Connect your deployed Google Apps Script endpoint URL</div>
+                  <div class="card-title"><i class="fa-brands fa-node-js" style="color: #10b981;"></i> Node.js & Firebase REST API</div>
+                  <div class="card-subtitle">Connect and configure your Express backend endpoint</div>
                 </div>
               </div>
 
               <div class="form-group">
-                <label class="form-label" for="gasEndpointInput">Google Apps Script Web App URL</label>
-                <input type="url" class="form-control" id="gasEndpointInput" placeholder="https://script.google.com/macros/s/.../exec">
+                <label class="form-label" for="gasEndpointInput">Node.js Backend REST API URL</label>
+                <input type="url" class="form-control" id="gasEndpointInput" placeholder="http://localhost:5000/api" value="http://localhost:5000/api">
                 <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem;">
-                  Leave blank to use instant Local Storage mock database mode.
+                  Default: <code>http://localhost:5000/api</code>.
                 </div>
               </div>
 
               <div style="display: flex; gap: 0.75rem; margin-top: 1.25rem;">
                 <button class="btn btn-primary btn-sm" id="saveGasUrlBtn">
-                  <i class="fa-solid fa-plug"></i> Connect Endpoint
+                  <i class="fa-solid fa-link"></i> Connect REST API
                 </button>
                 <button class="btn btn-secondary btn-sm" id="disconnectGasBtn">
                   <i class="fa-solid fa-power-off"></i> Use Local Mode
@@ -939,10 +1061,10 @@
 
               <div style="margin-top: 1.5rem; padding: 1rem; background: #f8fafc; border: 1px solid var(--border-subtle); border-radius: var(--radius-md);">
                 <div style="font-size: 0.85rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-primary);">
-                  ⚡ Quick Status Check:
+                  ⚡ Backend & Database Status:
                 </div>
                 <div style="font-size: 0.82rem; color: var(--text-secondary);" id="gasStatusReport">
-                  Running on fast, zero-config Local Storage database.
+                  Connected to Node.js Express REST API & Cloud Firestore on port 5000.
                 </div>
               </div>
             </div>
@@ -950,26 +1072,68 @@
             <!-- Database Architecture Card -->
             <div class="card">
               <div class="card-header">
-                <div class="card-title"><i class="fa-solid fa-table-cells" style="color: var(--accent-emerald);"></i> Google Sheets 5-Table Database Schema</div>
+                <div class="card-title"><i class="fa-solid fa-fire-flame-curved" style="color: #f59e0b;"></i> Cloud Firestore Collections Schema</div>
               </div>
 
               <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.84rem;">
-                <div style="padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: var(--radius-sm);">
-                  <strong style="color: #6366f1;">1. Users Sheet:</strong> UserID, Name, Email, MonthlyIncome, MonthlySavingCapacity, CreatedDate
+                <div style="padding: 0.75rem; background: #f8fafc; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);">
+                  <strong style="color: #4f46e5;">1. users:</strong> userId, name, email, monthlyIncome, monthlyCapacity, createdAt
                 </div>
-                <div style="padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: var(--radius-sm);">
-                  <strong style="color: #10b981;">2. Goals Sheet:</strong> GoalID, UserID, GoalName, Purpose, TargetAmount, CurrentSavings, MonthlySavingCapacity, Deadline, Status, RealityScore, EmailAlert, CreatedDate
+                <div style="padding: 0.75rem; background: #f8fafc; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);">
+                  <strong style="color: #059669;">2. goals:</strong> goalId, userId, goalName, purpose, targetAmount, currentSavings, monthlySavingCapacity, deadline, status, realityScore, emailAlert, createdAt
                 </div>
-                <div style="padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: var(--radius-sm);">
-                  <strong style="color: #06b6d4;">3. Savings Sheet:</strong> SavingID, GoalID, Date, Amount, Notes
+                <div style="padding: 0.75rem; background: #f8fafc; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);">
+                  <strong style="color: #0891b2;">3. transactions:</strong> transactionId, userId, goalId, amount, type, notes, createdAt
                 </div>
-                <div style="padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: var(--radius-sm);">
-                  <strong style="color: #f59e0b;">4. Expenses Sheet:</strong> ExpenseID, UserID, Date, Category, Amount, Notes
+                <div style="padding: 0.75rem; background: #f8fafc; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);">
+                  <strong style="color: #d97706;">4. expenses:</strong> expenseId, userId, date, category, amount, type, description, createdAt
                 </div>
-                <div style="padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: var(--radius-sm);">
-                  <strong style="color: #ef4444;">5. Alerts Sheet:</strong> AlertID, GoalID, UserID, AlertType, SentDate, Status
+                <div style="padding: 0.75rem; background: #f8fafc; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);">
+                  <strong style="color: #7c3aed;">5. notifications:</strong> notificationId, userId, goalId, type, message, createdAt, isRead, emailSent
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             VIEW 8: NOTIFICATIONS CENTER
+             ==================================================================== -->
+        <section class="view-section" id="view-notifications">
+          <div style="margin-bottom: 1.25rem; max-width: 900px; margin-left: auto; margin-right: auto;">
+            <button class="btn btn-secondary btn-sm" onclick="SaveIQApp.navigateTo('dashboard')" data-view="dashboard">
+              <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+            </button>
+          </div>
+          <div class="card" style="max-width: 900px; margin: 0 auto 1.5rem;">
+            <div class="card-header" style="flex-wrap: wrap; gap: 1rem;">
+              <div>
+                <div class="card-title"><i class="fa-solid fa-bell" style="color: var(--accent-primary);"></i> Notification & Alert Center</div>
+                <div class="card-subtitle">Automated Gmail notifications and milestone triggers</div>
+              </div>
+              <div style="display: flex; gap: 0.5rem;">
+                <button class="btn btn-secondary btn-sm" id="viewNotifScanBtn">
+                  <i class="fa-solid fa-arrows-rotate"></i> Scan Triggers
+                </button>
+                <button class="btn btn-primary btn-sm" id="viewNotifMarkAllReadBtn">
+                  <i class="fa-solid fa-check-double"></i> Mark All Read
+                </button>
+              </div>
+            </div>
+
+            <!-- Notification Filter Tabs -->
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.75rem;">
+              <button class="btn btn-secondary btn-sm active-filter notif-view-filter-btn" data-filter="all">All Notifications (<span id="notifViewCountAll">0</span>)</button>
+              <button class="btn btn-secondary btn-sm notif-view-filter-btn" data-filter="unread">Unread Only (<span id="notifViewCountUnread">0</span>)</button>
+              <button class="btn btn-secondary btn-sm notif-view-filter-btn" data-filter="Target Completed">Completed 🎉</button>
+              <button class="btn btn-secondary btn-sm notif-view-filter-btn" data-filter="Higher Monthly Savings">Milestones 👏</button>
+              <button class="btn btn-secondary btn-sm notif-view-filter-btn" data-filter="Deadline Reminder">Deadlines ⏰</button>
+              <button class="btn btn-secondary btn-sm notif-view-filter-btn" data-filter="Missed Monthly Target">Alerts ⚠️</button>
+            </div>
+
+            <!-- Notifications Full List -->
+            <div id="fullNotificationsList" style="display: flex; flex-direction: column; gap: 0.75rem;">
+              <!-- Populated dynamically via JavaScript -->
             </div>
           </div>
         </section>
@@ -1017,7 +1181,7 @@
         </div>
 
         <!-- Adaptive Preview Callout inside modal -->
-        <div id="modalAdaptivePreview" style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-md); padding: 0.85rem; margin-bottom: 1.25rem; font-size: 0.82rem; color: #a7f3d0;">
+        <div id="modalAdaptivePreview" style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-md); padding: 0.85rem; margin-bottom: 1.25rem; font-size: 0.82rem; color: #065f46;">
           <i class="fa-solid fa-sliders"></i> <strong>Adaptive Recalibration:</strong> Logging this deposit will automatically recalculate your remaining required monthly pace.
         </div>
 
@@ -1028,14 +1192,129 @@
     </div>
   </div>
 
+  <!-- ==========================================================================
+       MODAL: AUTHENTICATION (SIGN IN / REGISTER / FORGOT PASSWORD)
+       ========================================================================== -->
+  <div class="auth-modal-overlay" id="authModal">
+    <div class="auth-card">
+      <div class="auth-header">
+        <button type="button" class="auth-close-btn" id="closeAuthModalBtn" onclick="SaveIQApp.closeAuthModal()" title="Back / Close" aria-label="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="auth-brand-icon">
+          <i class="fa-solid fa-chart-line"></i>
+        </div>
+        <h2>SaveIQ</h2>
+        <p>AI Goal Reality & Smart Savings Planner</p>
+      </div>
+
+      <div class="auth-tabs">
+        <button class="auth-tab-btn active" id="authTabLoginBtn" data-tab="login">Sign In</button>
+        <button class="auth-tab-btn" id="authTabRegisterBtn" data-tab="register">Register</button>
+        <button class="auth-tab-btn" id="authTabForgotBtn" data-tab="forgot">Forgot Password</button>
+      </div>
+
+      <div class="auth-body">
+        <!-- Error & Success Alert Banners -->
+        <div class="auth-alert error" id="authAlertError">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          <span id="authAlertErrorText">Invalid credentials</span>
+        </div>
+        <div class="auth-alert success" id="authAlertSuccess">
+          <i class="fa-solid fa-circle-check"></i>
+          <span id="authAlertSuccessText">Success!</span>
+        </div>
+
+        <!-- TAB 1: LOGIN FORM -->
+        <form id="authLoginForm">
+          <div class="form-group">
+            <label class="form-label" for="loginEmailInput">Email Address *</label>
+            <input type="email" class="form-control" id="loginEmailInput" placeholder="name@example.com" required autocomplete="username">
+          </div>
+
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+              <label class="form-label" for="loginPasswordInput" style="margin-bottom: 0;">Password *</label>
+              <a href="#" id="authForgotLink" style="font-size: 0.78rem; color: var(--accent-primary); font-weight: 600;">Forgot Password?</a>
+            </div>
+            <input type="password" class="form-control" id="loginPasswordInput" placeholder="••••••••" required autocomplete="current-password">
+          </div>
+
+          <div style="margin-bottom: 1.25rem; font-size: 0.8rem; color: var(--text-muted); background: #f8fafc; padding: 0.65rem 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+            💡 <strong>Demo Account:</strong> <code>aarav.sharma@example.com</code> &bull; Password: <code>SaveIQ@2026</code>
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="loginSubmitBtn" style="width: 100%; padding: 0.8rem; font-size: 0.95rem;">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In to SaveIQ
+          </button>
+        </form>
+
+        <!-- TAB 2: REGISTER FORM -->
+        <form id="authRegisterForm" style="display: none;">
+          <div class="form-group">
+            <label class="form-label" for="regNameInput">Full Name *</label>
+            <input type="text" class="form-control" id="regNameInput" placeholder="Aarav Sharma" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="regEmailInput">Email Address *</label>
+            <input type="email" class="form-control" id="regEmailInput" placeholder="name@example.com" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="regPasswordInput">Password (min 6 chars) *</label>
+            <input type="password" class="form-control" id="regPasswordInput" placeholder="••••••••" minlength="6" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="regConfirmPasswordInput">Confirm Password *</label>
+            <input type="password" class="form-control" id="regConfirmPasswordInput" placeholder="••••••••" minlength="6" required>
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="regSubmitBtn" style="width: 100%; padding: 0.8rem; font-size: 0.95rem; margin-top: 0.5rem;">
+            <i class="fa-solid fa-user-plus"></i> Create Account
+          </button>
+        </form>
+
+        <!-- TAB 3: FORGOT PASSWORD FORM -->
+        <form id="authForgotForm" style="display: none;">
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+            Enter your registered email address to reset your password.
+          </p>
+
+          <div class="form-group">
+            <label class="form-label" for="forgotEmailInput">Registered Email Address *</label>
+            <input type="email" class="form-control" id="forgotEmailInput" placeholder="name@example.com" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="forgotNewPasswordInput">New Password (min 6 chars) *</label>
+            <input type="password" class="form-control" id="forgotNewPasswordInput" placeholder="••••••••" minlength="6" required>
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="forgotSubmitBtn" style="width: 100%; padding: 0.8rem; font-size: 0.95rem;">
+            <i class="fa-solid fa-key"></i> Reset Password
+          </button>
+        </form>
+
+        <!-- Back to Dashboard button at the bottom of modal -->
+        <div style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border-subtle); text-align: center;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="SaveIQApp.closeAuthModal()" style="width: 100%; justify-content: center; gap: 0.5rem; font-size: 0.85rem;">
+            <i class="fa-solid fa-arrow-left"></i> Go Back to Dashboard
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Container -->
   <div class="toast-container" id="toastContainer"></div>
 
   <!-- Application Logic Scripts -->
-  <script src="js/calculations.js"></script>
-  <script src="js/api.js"></script>
-  <script src="js/charts.js"></script>
-  <script src="js/ai-advisor.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/calculations.js?v=2.0.2"></script>
+  <script src="js/api.js?v=2.0.2"></script>
+  <script src="js/charts.js?v=2.0.2"></script>
+  <script src="js/ai-advisor.js?v=2.0.2"></script>
+  <script src="js/app.js?v=2.0.2"></script>
 </body>
 </html>

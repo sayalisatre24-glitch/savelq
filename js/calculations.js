@@ -51,12 +51,13 @@ const SaveIQCalc = {
    * @param {number} [userMonthlyIncome]
    * @returns {Object} Complete reality check evaluation
    */
-  evaluateGoalReality(goal, userMonthlyIncome = 0) {
-    const target = Math.max(0, Number(goal.targetAmount) || 0);
-    const current = Math.max(0, Number(goal.currentSavings) || 0);
-    const capacity = Math.max(0, Number(goal.monthlyCapacity) || 0);
+  evaluateGoalReality(goal = {}, userMonthlyIncome = 0) {
+    const target = Math.max(0, Number(goal.targetAmount !== undefined ? goal.targetAmount : (goal.TargetAmount !== undefined ? goal.TargetAmount : 0)) || 0);
+    const current = Math.max(0, Number(goal.currentSavings !== undefined ? goal.currentSavings : (goal.CurrentSavings !== undefined ? goal.CurrentSavings : 0)) || 0);
+    const capacity = Math.max(0, Number(goal.monthlyCapacity !== undefined ? goal.monthlyCapacity : (goal.monthlySavingCapacity !== undefined ? goal.monthlySavingCapacity : (goal.MonthlySavingCapacity !== undefined ? goal.MonthlySavingCapacity : 0))) || 0);
     const now = new Date();
-    const deadline = new Date(goal.deadline);
+    const rawDeadline = goal.deadline || goal.Deadline || new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const deadline = new Date(rawDeadline);
     
     const remainingAmount = Math.max(0, target - current);
     const progressPercent = target > 0 ? Math.min(100, Math.round((current / target) * 1000) / 10) : 100;
@@ -252,6 +253,17 @@ const SaveIQCalc = {
   },
 
   /**
+   * Helper to get CSS tier class for any reality score
+   */
+  getScoreTierClass(score) {
+    const num = Number(score) || 0;
+    if (num >= 80) return 'score-excellent';
+    if (num >= 65) return 'score-good';
+    if (num >= 45) return 'score-moderate';
+    return 'score-critical';
+  },
+
+  /**
    * Interactive What-If Simulator Calculation
    * Simulates changes to Target, Savings, Capacity, and Deadline
    * @param {Object} baseGoal 
@@ -314,33 +326,45 @@ const SaveIQCalc = {
     const planAMonthsNeeded = Math.max(1, Math.ceil(remainingAmount / safeCapacity));
     const planADeadline = new Date(now);
     planADeadline.setMonth(planADeadline.getMonth() + planAMonthsNeeded);
+    const planADeadlineStr = planADeadline.toISOString().split('T')[0];
     
     const planA = {
       name: 'Plan A: Extend Deadline',
+      title: 'Plan A: Extend Deadline',
       tagline: 'Keep your target, give yourself more time',
+      description: `Save ₹${safeCapacity.toLocaleString()}/month for ${planAMonthsNeeded} months to reach your full ₹${target.toLocaleString()} goal.`,
       targetAmount: target,
       monthlySaving: safeCapacity,
+      newMonthlyRate: safeCapacity,
       monthsNeeded: planAMonthsNeeded,
-      newDeadline: planADeadline.toISOString().split('T')[0],
+      newDeadline: planADeadlineStr,
       deadlineExtensionMonths: Math.max(0, Math.round(planAMonthsNeeded - monthsRemaining)),
       realityScore: 88,
+      score: 88,
       status: 'On Track',
       summary: `Save ₹${safeCapacity.toLocaleString()}/month for ${planAMonthsNeeded} months to reach your full ₹${target.toLocaleString()} goal.`
     };
 
     // PLAN B: Keep Deadline → Realistically Adjust Target
     const planBAchievableTarget = Math.round(current + (safeCapacity * monthsRemaining));
+    const planBReduction = Math.max(0, target - planBAchievableTarget);
     const planB = {
       name: 'Plan B: Adjusted Target',
+      title: 'Plan B: Adjusted Target',
       tagline: 'Hit your original deadline with a scaled target',
+      description: `Reach ₹${planBAchievableTarget.toLocaleString()} on time (${goal.Deadline || goal.deadline}) by continuing to save ₹${safeCapacity.toLocaleString()}/month.`,
       targetAmount: planBAchievableTarget,
+      feasibleTarget: planBAchievableTarget,
       monthlySaving: safeCapacity,
+      newMonthlyRate: safeCapacity,
       monthsNeeded: Math.round(monthsRemaining * 10) / 10,
-      newDeadline: goal.deadline,
-      reductionAmount: Math.max(0, target - planBAchievableTarget),
+      newDeadline: goal.Deadline || goal.deadline,
+      reductionAmount: planBReduction,
+      reduction: planBReduction,
       realityScore: 85,
+      score: 85,
       status: 'On Track',
-      summary: `Reach ₹${planBAchievableTarget.toLocaleString()} on time (${goal.deadline}) by continuing to save ₹${safeCapacity.toLocaleString()}/month.`
+      summary: `Reach ₹${planBAchievableTarget.toLocaleString()} on time (${goal.Deadline || goal.deadline}) by continuing to save ₹${safeCapacity.toLocaleString()}/month.`
     };
 
     // PLAN C: Keep Target & Deadline → Increase Monthly Savings
@@ -348,13 +372,18 @@ const SaveIQCalc = {
     const planCIncreaseNeeded = Math.max(0, planCRequiredMonthly - capacity);
     const planC = {
       name: 'Plan C: Fast-Track Savings',
+      title: 'Plan C: Fast-Track Savings',
       tagline: 'Achieve 100% on schedule by optimizing monthly budget',
+      description: `Increase your monthly savings by ₹${planCIncreaseNeeded.toLocaleString()} (to ₹${planCRequiredMonthly.toLocaleString()}/month) to hit ₹${target.toLocaleString()} on deadline.`,
       targetAmount: target,
       monthlySaving: planCRequiredMonthly,
+      requiredMonthlyCapacity: planCRequiredMonthly,
       monthlyIncrease: planCIncreaseNeeded,
+      extraNeeded: planCIncreaseNeeded,
       monthsNeeded: Math.round(monthsRemaining * 10) / 10,
-      newDeadline: goal.deadline,
+      newDeadline: goal.Deadline || goal.deadline,
       realityScore: 92,
+      score: 92,
       status: 'On Track',
       summary: `Increase your monthly savings by ₹${planCIncreaseNeeded.toLocaleString()} (to ₹${planCRequiredMonthly.toLocaleString()}/month) to hit ₹${target.toLocaleString()} on deadline.`
     };
@@ -375,13 +404,13 @@ const SaveIQCalc = {
    * @returns {Object} Recalibrated milestone and explanation
    */
   calculateAdaptivePlan(goal, actualDepositedAmount, expectedMonthlySaving) {
-    const target = Number(goal.targetAmount);
-    const previousSavings = Number(goal.currentSavings);
+    const target = Number(goal.targetAmount || goal.TargetAmount || 0);
+    const previousSavings = Number(goal.currentSavings || goal.CurrentSavings || 0);
     const newCurrentSavings = previousSavings + Number(actualDepositedAmount);
     const remainingAmount = Math.max(0, target - newCurrentSavings);
     
     const now = new Date();
-    const deadline = new Date(goal.deadline);
+    const deadline = new Date(goal.deadline || goal.Deadline || new Date());
     const remainingMonths = Math.max(0.5, this.calculateMonthsRemaining(now, deadline));
     
     const newRequiredMonthly = remainingAmount > 0 
@@ -417,39 +446,34 @@ const SaveIQCalc = {
    */
   analyzeExpensesAndBudget(monthlyIncome, expenses = []) {
     const income = Math.max(0, Number(monthlyIncome) || 0);
-    
-    const categoryTotals = {
-      Food: 0,
-      Transport: 0,
-      Bills: 0,
-      Shopping: 0,
-      Entertainment: 0,
-      Education: 0,
-      Other: 0
-    };
-
+    const categoryTotals = {};
     let totalExpenses = 0;
+    let needsTotal = 0;
+    let wantsTotal = 0;
+
+    const needsCategories = ['Rent', 'Housing', 'Bills', 'Utilities', 'Food', 'Groceries', 'Transport', 'Fuel', 'Education', 'Health', 'Insurance', 'Medicine'];
+
     expenses.forEach(exp => {
-      const amt = Math.max(0, Number(exp.Amount || exp.amount || 0));
-      const cat = exp.Category || exp.category || 'Other';
-      if (categoryTotals[cat] !== undefined) {
-        categoryTotals[cat] += amt;
-      } else {
-        categoryTotals['Other'] += amt;
-      }
+      const amt = Math.max(0, Number(exp.Amount !== undefined ? exp.Amount : (exp.amount !== undefined ? exp.amount : 0)));
+      const rawCat = (exp.Category || exp.category || 'Other').trim();
+      const cat = rawCat.charAt(0).toUpperCase() + rawCat.slice(1);
+      
+      categoryTotals[cat] = (categoryTotals[cat] || 0) + amt;
       totalExpenses += amt;
+
+      const expType = exp.Type || exp.type;
+      const isNeed = expType === 'Need' || (!expType && needsCategories.some(nc => nc.toLowerCase() === cat.toLowerCase()));
+      if (isNeed) {
+        needsTotal += amt;
+      } else {
+        wantsTotal += amt;
+      }
     });
 
     const netDisposableSavings = Math.max(0, income - totalExpenses);
     const savingsRatePercent = income > 0 ? Math.round((netDisposableSavings / income) * 1000) / 10 : 0;
     const expenseRatePercent = income > 0 ? Math.round((totalExpenses / income) * 1000) / 10 : 0;
 
-    // 50/30/20 Rule Comparison: Needs (50%), Wants (30%), Savings (20%)
-    // Needs: Bills, Food, Transport, Education
-    // Wants: Shopping, Entertainment, Other
-    const needsTotal = categoryTotals.Bills + categoryTotals.Food + categoryTotals.Transport + categoryTotals.Education;
-    const wantsTotal = categoryTotals.Shopping + categoryTotals.Entertainment + categoryTotals.Other;
-    
     const idealNeeds = Math.round(income * 0.50);
     const idealWants = Math.round(income * 0.30);
     const idealSavings = Math.round(income * 0.20);

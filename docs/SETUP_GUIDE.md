@@ -1,118 +1,93 @@
-# SaveIQ – Complete Setup & Deployment Guide
+# SaveIQ – Node.js & Firebase Setup & Deployment Guide
 
-This guide walks you step-by-step through setting up Google Sheets, Google Apps Script, Groq AI API, automated Gmail deadline alerts, and deploying the frontend.
-
----
-
-## Part 1: Google Sheet & Database Setup
-
-1. Open your browser and go to [Google Sheets](https://sheets.new).
-2. Name your spreadsheet: **`SaveIQ Database`**.
-3. In the top menu, click **Extensions** &rarr; **Apps Script**.
-4. Rename the Apps Script project to **`SaveIQ Backend Engine`**.
+This guide walks you step-by-step through setting up Firebase Authentication, Cloud Firestore, Groq AI API, automated email alerts via Nodemailer, and running the Node.js Express backend.
 
 ---
 
-## Part 2: Deploying Apps Script Backend Code
+## Part 1: Firebase Authentication & Cloud Firestore Setup
 
-1. In the Apps Script editor, open the default `Code.gs` file.
-2. Replace all contents with the code from [`backend/Code.gs`](file:///c:/Users/Sayali/Downloads/SavelQ/backend/Code.gs).
-3. To configure OAuth scopes:
-   - Click the gear icon ⚙️ (**Project Settings**) on the left sidebar.
-   - Check the box for **"Show 'appsscript.json' manifest file in editor"**.
-   - Go back to the **Editor** (<>) tab, click on `appsscript.json`, and replace its content with [`backend/appsscript.json`](file:///c:/Users/Sayali/Downloads/SavelQ/backend/appsscript.json).
-4. Click **Save** (💾 icon or `Ctrl+S`).
-
----
-
-## Part 3: One-Click Database Initialization
-
-1. In the Apps Script toolbar dropdown (next to "Debug"), select the function **`setupDatabase`**.
-2. Click **Run**.
-3. When prompted with **"Authorization Required"**:
-   - Click **Review Permissions**.
-   - Select your Google Account.
-   - Click **Advanced** &rarr; **Go to SaveIQ Backend Engine (unsafe)**.
-   - Click **Allow**.
-4. Once completed, go back to your Google Sheet. You will see **5 newly created sheets** with styled headers:
-   - `Users`
-   - `Goals`
-   - `Savings`
-   - `Expenses`
-   - `Alerts`
+1. Go to the [Firebase Console](https://console.firebase.google.com/) and click **Add project** (e.g. `saveiq-ai`).
+2. **Enable Firebase Authentication**:
+   - In the left sidebar, navigate to **Build** &rarr; **Authentication**.
+   - Click **Get Started** and enable **Email/Password** as a sign-in provider.
+3. **Enable Cloud Firestore**:
+   - In the left sidebar, navigate to **Build** &rarr; **Firestore Database**.
+   - Click **Create Database**, select your closest server region (e.g., `asia-south1` or `us-central1`), and start in **Production Mode**.
+4. **Generate Service Account Private Key**:
+   - Click the gear icon ⚙️ (**Project Settings**) &rarr; **Service accounts**.
+   - Select **Node.js** and click **Generate new private key**.
+   - Save the downloaded JSON file securely.
 
 ---
 
-## Part 4: Configuring Groq AI API Key
+## Part 2: Backend Environment Variables (`server/.env`)
+
+1. Open `server/.env` (or copy from `server/.env.example`).
+2. Populate the following variables from your downloaded Firebase service account JSON:
+   ```ini
+   PORT=5000
+   NODE_ENV=development
+   CLIENT_URL=http://localhost:3000
+
+   # Firebase Admin Configuration
+   FIREBASE_PROJECT_ID="your-project-id"
+   FIREBASE_CLIENT_EMAIL="firebase-adminsdk-xxxxx@your-project-id.iam.gserviceaccount.com"
+   FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIEvgI...\n-----END PRIVATE KEY-----\n"
+   ```
+
+---
+
+## Part 3: Groq AI Strategic Advisor Setup
 
 1. Go to [Groq Console](https://console.groq.com) and create a free API key.
-2. In your Google Apps Script editor, click ⚙️ (**Project Settings**).
-3. Scroll down to **Script Properties** and click **Add script property**.
-4. Enter:
-   - **Property**: `GROQ_API_KEY`
-   - **Value**: `gsk_your_actual_groq_api_key_here`
-5. Click **Save script properties**.
-
-> [!NOTE]
-> Storing the API key in Script Properties ensures it remains securely on Google's servers and is never exposed in browser network requests.
+2. Add your key to `server/.env`:
+   ```ini
+   GROQ_API_KEY="gsk_your_groq_api_key_here"
+   GROQ_MODEL="llama-3.3-70b-versatile"
+   ```
 
 ---
 
-## Part 5: Setting Up Automated Gmail Alerts (Daily Trigger)
+## Part 4: Automated Email Notifications Setup (Nodemailer)
 
-1. In the Apps Script left sidebar, click the alarm clock icon ⏰ (**Triggers**).
-2. Click **+ Add Trigger** (bottom right).
-3. Configure the trigger:
-   - **Choose which function to run**: `checkGoalDeadlines`
-   - **Choose which deployment should run**: `Head`
-   - **Select event source**: `Time-driven`
-   - **Select type of time based trigger**: `Day timer`
-   - **Select time of day**: `8am to 9am` (or your preferred morning window)
-4. Click **Save**.
+To enable automatic emails for **Target Completed**, **Higher Monthly Savings**, **Deadline Reminders**, and **Missed Monthly Targets**:
 
-The script will now automatically scan all active goals every morning and dispatch styled HTML email reminders via Gmail when deadlines approach or goals are at risk!
-
----
-
-## Part 6: Deploying as a Web App
-
-1. In Apps Script, click the blue **Deploy** button (top right) &rarr; **New deployment**.
-2. Click the gear icon ⚙️ next to "Select type" &rarr; choose **Web app**.
-3. Fill in the deployment parameters:
-   - **Description**: `SaveIQ Production Web App v1.0`
-   - **Execute as**: `Me (your_email@gmail.com)`
-   - **Who has access**: `Anyone` *(Crucial for frontend fetch requests)*
-4. Click **Deploy**.
-5. Copy the generated **Web App URL** (e.g. `https://script.google.com/macros/s/AKfycb.../exec`).
+1. Generate a **Google App Password** (for Gmail) or use any standard SMTP provider:
+   - Go to [Google Account Security](https://myaccount.google.com/security).
+   - Ensure 2-Step Verification is ON &rarr; Create an **App Password** under "App Passwords".
+2. Add the credentials to `server/.env`:
+   ```ini
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=587
+   SMTP_SECURE=false
+   SMTP_USER="your-email@gmail.com"
+   SMTP_PASS="your-16-character-app-password"
+   EMAIL_FROM="SaveIQ AI Goal Tracker <notifications@saveiq.app>"
+   ```
 
 ---
 
-## Part 7: Connecting Frontend to Apps Script
+## Part 5: Starting the Application
 
-1. Open [`index.html`](file:///c:/Users/Sayali/Downloads/SavelQ/index.html) in your browser.
-2. In the sidebar, click on **Apps Script Hub**.
-3. Paste your Web App URL into the **Google Apps Script Web App URL** input field.
-4. Click **Connect Endpoint**.
-5. The status badge will turn green (`Apps Script Live`). All goal creations, savings deposits, expenses, and AI requests are now synchronized live with your Google Sheet!
-
----
-
-## Part 8: Git & GitHub Version Control
-
-To initialize and push this project to GitHub:
-
+### 1. Start the Node.js Backend Server:
 ```bash
-# Initialize Git repository
-git init
-
-# Add all files
-git add .
-
-# Commit changes
-git commit -m "Initial commit: SaveIQ AI Goal Reality & Savings Planner"
-
-# Create a main branch and push to GitHub
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/SaveIQ.git
-git push -u origin main
+cd server
+npm install
+npm start
 ```
+*Backend will listen on `http://localhost:5000` with automated background cron scanning.*
+
+### 2. Start the Frontend Client:
+```bash
+npm run client
+```
+*Frontend will run on `http://localhost:3000`.*
+
+---
+
+## Part 6: Production Deployment (Render, Railway, Heroku, or AWS)
+
+1. Deploy the `server/` directory as a Node.js web service on [Render](https://render.com) or [Railway](https://railway.app).
+2. Set the environment variables in your hosting dashboard (`FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`, `GROQ_API_KEY`, `SMTP_USER`, `SMTP_PASS`).
+3. Deploy the frontend static files (`index.html`, `css/`, `js/`) to Vercel, Netlify, or Firebase Hosting.
+4. Set `saveiq_node_api_url` in the frontend to your live production API URL (e.g. `https://saveiq-api.onrender.com/api`).

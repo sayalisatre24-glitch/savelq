@@ -1,0 +1,11 @@
+[
+  {
+    "id": "USR_001",
+    "userId": "USR_001",
+    "name": "Aarav Sharma",
+    "email": "aarav.sharma@example.com",
+    "monthlyIncome": 75000,
+    "monthlyCapacity": 20000,
+    "createdAt": "2026-09-23"
+  }
+]

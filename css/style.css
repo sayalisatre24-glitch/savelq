@@ -545,3 +545,11 @@ button, input, select, textarea {
     padding: 1rem;
   }
 }
+
+/* Ensure Chart canvases maintain fixed proportions and never stretch infinitely */
+canvas {
+  max-width: 100% !important;
+  max-height: 100% !important;
+  display: block;
+}
+
